@@ -1,44 +1,32 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../services/api';
+import { Container, TextField, Button, Typography } from '@mui/material';
+import { login, getCompanyById } from '../services/api';
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleLogin = async () => {
     try {
       const response = await login(email, password);
-      localStorage.setItem('isAuthenticated', 'true'); // Marcar como autenticado
+      localStorage.setItem('token', response.token);
+      const company = await getCompanyById(response.companiesId, response.token);
+      localStorage.setItem('companyName', company.tradeName);
       navigate('/dashboard');
     } catch (error) {
-      console.error('Erro ao fazer login:', error);
+      console.error('Login failed', error);
     }
   };
 
   return (
-    <div className="login-container">
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Senha"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Entrar</button>
-      </form>
-    </div>
+    <Container maxWidth="sm">
+      <Typography variant="h4" gutterBottom>Login</Typography>
+      <TextField label="Email" fullWidth value={email} onChange={(e) => setEmail(e.target.value)} />
+      <TextField label="Password" type="password" fullWidth value={password} onChange={(e) => setPassword(e.target.value)} />
+      <Button variant="contained" color="primary" onClick={handleLogin}>Login</Button>
+    </Container>
   );
 };
 

@@ -1,0 +1,14 @@
+body {
+  display: flex;
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+}
+
+.MuiDrawer-paper {
+  width: 240px;
+}
+
+.MuiContainer-root {
+  margin-top: 64px;
+  margin-left: 240px;
+}

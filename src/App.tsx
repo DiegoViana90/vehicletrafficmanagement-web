@@ -1,25 +1,21 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Login from './components/Login';
-import Dashboard from './components/Dashboard';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import Header from './components/Header';
 import Sidebar from './components/Sidebar';
-import './App.css';
+import Dashboard from './components/Dashboard';
+import Login from './components/Login';
 
 const App: React.FC = () => {
-  const isAuthenticated = localStorage.getItem('isAuthenticated'); // Verifica se o usuário está autenticado
+  const isAuthenticated = !!localStorage.getItem('token');
 
   return (
     <Router>
-      <div className="app">
-        {isAuthenticated && <Sidebar />} {/* Renderiza a Sidebar apenas se autenticado */}
-        <div className="content">
-          <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            {/* Adicione outras rotas para módulos aqui */}
-          </Routes>
-        </div>
-      </div>
+      {isAuthenticated && <Header />}
+      {isAuthenticated && <Sidebar />}
+      <Routes>
+        <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/" />} />
+        <Route path="/" element={<Login />} />
+      </Routes>
     </Router>
   );
 };

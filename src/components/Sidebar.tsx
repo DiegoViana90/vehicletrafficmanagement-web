@@ -1,17 +1,23 @@
 import React from 'react';
+import { Drawer, List, ListItem, ListItemText } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 const Sidebar: React.FC = () => {
   return (
-    <div className="sidebar">
-      <h3>Módulos</h3>
-      <ul>
-        <li><Link to="/fuel-log">Fuel Log</Link></li>
-        <li><Link to="/traffic-log">Traffic Log</Link></li>
-        <li><Link to="/drivers">Drivers</Link></li>
-        {/* Adicione outros módulos aqui */}
-      </ul>
-    </div>
+    <Drawer variant="permanent">
+      <List>
+        <ListItem button component={Link} to="/dashboard">
+          <ListItemText primary="Dashboard" />
+        </ListItem>
+        <ListItem button component={Link} to="/recebimentos">
+          <ListItemText primary="Recebimentos" />
+        </ListItem>
+        <ListItem button component={Link} to="/cadastros">
+          <ListItemText primary="Cadastros" />
+        </ListItem>
+        {/* Adicione outros itens conforme necessário */}
+      </List>
+    </Drawer>
   );
 };
 

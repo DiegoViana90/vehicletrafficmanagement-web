@@ -1,7 +1,369 @@
 body {
-  display: flex;
   margin: 0;
-  font-family: 'Roboto', sans-serif;
+  font-family: Arial, sans-serif;
+  background-color: #020212;
+}
+
+.container {
+  display: flex;
+  flex-direction: column; 
+  align-items: center;
+  justify-content: center;
+  background-color: #020212;
+  padding: 20px; 
+  border-radius: 10px; 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+  margin-top: 50px; 
+}
+
+.card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%; 
+  max-width: 1200px; 
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+h2 {
+  color: #000000;
+  text-align: center;
+}
+
+input,
+.button-login {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #000000;
+  box-sizing: border-box;
+}
+
+.button-login {
+  background-color: #ffff00;
+  color: #020212;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.button-login:hover {
+  background-color: #00b336;
+  color: #ffffff;
+}
+
+.login-logo {
+  width: 80%; 
+  max-width: 300px;
+  display: block;
+  margin: auto;
+  margin-bottom: 20px;
+}
+
+.user-dashboard {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+}
+
+.user-dashboard .sidebar {
+  width: 240px;
+  background-color: #fff;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.user-dashboard .main-content {
+  flex: 1;
+  padding: 20px;
+  background-color: #fff;
+}
+
+.user-dashboard h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.user-dashboard .input-container {
+  display: flex;
+  flex-direction: column; 
+  margin-bottom: 20px; 
+}
+
+.user-dashboard .input-title,
+.user-dashboard .textarea-description {
+  width: calc(70% - 20px); 
+  padding: 15px; 
+  border-radius: 5px;
+  border: 1px solid #000;
+  box-sizing: border-box;
+  margin: 10px auto; 
+  margin-bottom: 20px;
+}
+
+.user-dashboard .input-container {
+  display: flex;
+  flex-wrap: wrap; 
+  justify-content: center;
+  align-items: center;
+}
+
+.user-dashboard .textarea-description {
+  resize: vertical;
+  height: 200px; 
+}
+
+.user-dashboard .button-create-ticket {
+  width: 50%; 
+  padding: 15px; 
+  margin: 20px auto; 
+  border-radius: 5px;
+  border: none;
+  background-color: #007bff;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+  display: block;
+}
+
+.user-dashboard .button-create-ticket:hover {
+  background-color: #00b336;
+  color: #ffffff;
+}
+
+.user-dashboard table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.user-dashboard th,
+.user-dashboard td {
+  padding: 15px;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+
+.user-dashboard th {
+  background-color: #f0f0f0;
+  font-weight: bold;
+  text-align: center;
+}
+
+.user-dashboard .open-ticket {
+  background-color: #ccffcc;
+}
+
+.user-dashboard .closed-ticket {
+  background-color: #f15454;
+}
+
+.user-dashboard .analysis-ticket {
+  background-color: #ffeb99;
+}
+
+.user-dashboard .awaiting-authorization-ticket {
+  background-color: #cce5ff;
+}
+
+.user-dashboard .awaiting-order-ticket {
+  background-color: #d6c2ff;
+}
+
+.user-dashboard .not-authorized-ticket {
+  background-color: #dc1717;
+}
+
+.user-dashboard .description-cell {
+  max-width: 100%;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  position: relative;
+}
+
+.user-dashboard .description-tooltip {
+  position: absolute;
+  z-index: 1;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 5px;
+  display: none;
+  width: 200px;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.user-dashboard .description-cell:hover .description-tooltip {
+  display: block;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.pagination .page-item {
+  margin: 0 5px;
+}
+
+.pagination .page-link {
+  background-color: #f0f0f0;
+  color: #000;
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.pagination .page-link:hover {
+  background-color: #ccc;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}
+
+.tickets-title {
+  text-align: center;
+}
+
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  z-index: 1000;
+}
+
+.popup-content {
+  text-align: center;
+}
+
+.popup button {
+  margin-top: 10px;
+  padding: 8px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.popup button:hover {
+  background-color: #00b336;
+}
+
+.ticket-id-cell {
+  text-align: center; 
+  vertical-align: middle; 
+}
+
+.empty-fields-alert {
+  text-align: center;
+  color: #ff0101; 
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.container-login {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #020212;
+  height: 100vh;
+}
+
+.logo-container {
+  margin-bottom: 20px;
+}
+
+.card-login {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px; 
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.card-login h2 {
+  color: #000000;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.card-login form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.card-login .input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #000000;
+  box-sizing: border-box;
+}
+
+.card-login .button-login {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: none;
+  background-color: #a1a136;
+  color: #020212;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.card-login .button-login:hover {
+  background-color: #00b336;
+  color: #ffffff;
+}
+
+.update-button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.button-refresh {
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: none;
+  background-color: #007bff;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.button-refresh:hover {
+  background-color: #00b336;
+  color: #ffffff;
 }
 
 .MuiDrawer-paper {

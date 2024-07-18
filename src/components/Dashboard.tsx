@@ -1,25 +1,62 @@
-import React from 'react';
-import { Container, Typography, Grid, Paper } from '@mui/material';
+// Dashboard.tsx
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getCompanyById } from '../services/api'; // Importe a função específica
+import Sidebar from './Sidebar'; // Importe o componente Sidebar
+import './styles.css';
 
 const Dashboard: React.FC = () => {
-  const companyName = localStorage.getItem('companyName');
+    const navigate = useNavigate();
+    const [userName, setUserName] = useState('');
 
-  return (
-    <Container maxWidth="lg" style={{ marginTop: '64px', marginLeft: '240px' }}>
-      <Typography variant="h2" gutterBottom>
-        Bem-vindo à {companyName || 'Sua Empresa'}
-      </Typography>
-      <Grid container spacing={3}>
-        <Grid item xs={12} sm={6}>
-          <Paper>Valor a receber hoje: R$ 0,00</Paper>
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <Paper>Valor vencido há 2d: R$ 0,00</Paper>
-        </Grid>
-        {/* Adicione outros componentes conforme necessário */}
-      </Grid>
-    </Container>
-  );
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const user = JSON.parse(localStorage.getItem('user')!);
+                const token = localStorage.getItem('token')!;
+                
+                if (!user || !token) {
+                    console.error('Usuário ou token não encontrados no localStorage');
+                    navigate('/login');
+                    return;
+                }
+
+                if (user.isFirstAccess) {
+                    navigate('/change-password'); // Redireciona para ChangePassword se for o primeiro acesso
+                    return;
+                }
+
+                console.log(`Tentando obter dados da empresa para ID: ${user.companiesId}`);
+                const company = await getCompanyById(user.companiesId, token);
+                if (!company || !company.tradeName) {
+                    throw new Error('Dados da empresa não encontrados ou incompletos');
+                }
+
+                setUserName(company.tradeName);
+                console.log(`Seja bem-vindo, ${company.tradeName}!`);
+            } catch (error) {
+                console.error('Erro ao obter dados da empresa:', error);
+                alert('Erro ao obter dados da empresa. Verifique sua conexão.');
+                navigate('/login');
+            }
+        };
+
+        fetchUserData();
+    }, [navigate]);
+
+    return (
+        <div className="dashboard">
+            <Sidebar /> {/* Sidebar à esquerda */}
+            <div className="dashboard-content">
+                <header className="dashboard-header">
+                    <h2>Bem-vindo, {userName}</h2>
+                </header>
+                <main className="dashboard-main">
+                    {/* Renderize outros componentes aqui */}
+                </main>
+            </div>
+        </div>
+    );
 };
 
 export default Dashboard;

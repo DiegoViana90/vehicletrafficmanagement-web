@@ -1,28 +1,50 @@
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 
 const API_URL = 'http://192.168.0.112:7053/api/';
 
-interface LoginResponse {
-  token: string;
-  companiesId: number;
+interface AuthResponse {
+    token: string;
+    userId: number;
+    fullName: string;
+    email: string;
+    userType: number;
+    isFirstAccess: boolean;
+    isBlocked: boolean;
+    companiesId?: number;
+    company?: any;
 }
 
-interface CompanyDto {
-  id: number;
-  tradeName: string;
-  cnpj: string;
+interface UpdatePasswordRequest {
+    userId: number;
+    randomPassword: string; // Correspondente ao campo da API
+    newPassword: string;
 }
 
-export const login = async (email: string, password: string): Promise<LoginResponse> => {
-  const response: AxiosResponse<LoginResponse> = await axios.post(`${API_URL}auth/login`, { email, password });
-  return response.data;
+export const login = async (email: string, password: string): Promise<AuthResponse> => {
+    const response = await axios.post(`${API_URL}auth/Login`, { email, password });
+    return response.data;
 };
 
-export const getCompanyById = async (id: number, token: string): Promise<CompanyDto> => {
-  const response: AxiosResponse<CompanyDto> = await axios.get(`${API_URL}company/GetCompanyById?id=${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return response.data;
+export const getCompanyById = async (id: number, token: string): Promise<any> => {
+    try {
+        const response = await axios.get(`${API_URL}company/GetCompanyById?id=${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (response.status !== 200) {
+            throw new Error(`Erro na requisição: ${response.status}`);
+        }
+
+        return response.data;
+    } catch (error) {
+        console.error('Erro ao chamar a API getCompanyById:', error);
+        throw error;
+    }
+};
+
+export const changePassword = async (data: UpdatePasswordRequest): Promise<any> => {
+    const response = await axios.put(`${API_URL}auth/UpdateFirstPassword`, data);
+    return response.data;
 };

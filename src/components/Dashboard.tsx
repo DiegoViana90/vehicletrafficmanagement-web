@@ -1,13 +1,14 @@
+// Dashboard.tsx
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import Sidebar from './Sidebar';
-import Header from './Header';
-import './styles.css';
+import Layout from './Layout';  // Importe o Layout
 
 const Dashboard: React.FC = () => {
     const navigate = useNavigate();
     const { token } = useSelector((state: any) => state.auth);
+    const company = JSON.parse(localStorage.getItem('company') || '{}');
+    const tradeName = company.tradeName || 'Empresa';
 
     useEffect(() => {
         if (!token) {
@@ -16,18 +17,12 @@ const Dashboard: React.FC = () => {
     }, [token, navigate]);
 
     return (
-        <div style={{ display: 'flex' }}>
-            <Sidebar />
-            <div className="dashboard">
-                <Header />
-                <div className="dashboard-content">
-                    <main className="dashboard-main">
-                        {/* Conteúdo do dashboard aqui */}
-                        <h2>Bem-vindo ao Dashboard!</h2>
-                    </main>
-                </div>
-            </div>
-        </div>
+        <Layout>
+            <main className="dashboard-main">
+                <h1>Bem-vindo à {tradeName}</h1>
+                <h3>Sistema de Gerenciamento de veículos</h3>
+            </main>
+        </Layout>
     );
 };
 

@@ -1,7 +1,11 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 
-const ProtectedRoute: React.FC<{ isFirstAccess: boolean }> = ({ isFirstAccess }) => {
+interface ProtectedRouteProps {
+  isFirstAccess: boolean;
+}
+
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ isFirstAccess }) => {
     if (isFirstAccess) {
         return <Outlet />;
     } else {

@@ -13,20 +13,16 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Recupera informações da empresa do armazenamento local
   const company = JSON.parse(localStorage.getItem('company') || '{}');
   const tradeName = company.tradeName || 'Empresa';
 
   const handleLogout = () => {
-    // Limpar o estado de autenticação
     dispatch(logoutAction());
 
-    // Limpar o armazenamento local
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('company');
 
-    // Redirecionar para a tela de login
     navigate('/login');
   };
 

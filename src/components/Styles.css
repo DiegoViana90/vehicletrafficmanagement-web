@@ -98,4 +98,26 @@ body {
 
 .dashboard-main {
   margin-top: 20px;
+  padding-left: 300px; 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+}
+
+@media (max-width: 1370px) {
+  .dashboard-main {
+    padding-left: 100px; 
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-main {
+    padding-left: 50px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-main {
+    padding-left: 20px;
+  }
 }

@@ -20,6 +20,9 @@ body {
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
 }
 
 .input {
@@ -50,7 +53,7 @@ body {
 }
 
 .sidebar {
-  width: 200px;
+  width: 240px;
   background-color: #333;
   color: #fff;
   height: 100vh;
@@ -76,12 +79,17 @@ body {
 
 .dashboard {
   display: flex;
+  flex-direction: column;
+  margin-left: 240px;
+  margin-top: 64px; 
+  padding: 20px;
 }
 
 .dashboard-content {
-  margin-left: 200px;
-  padding: 20px;
   flex: 1;
+  display: flex;
+  justify-content: center; 
+  align-items: center; 
 }
 
 .dashboard-header {

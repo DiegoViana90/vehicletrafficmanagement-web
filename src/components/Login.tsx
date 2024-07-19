@@ -69,7 +69,7 @@ const Login: React.FC = () => {
     return (
         <div className="container">
             <div className="card">
-                <h2>Login Suporte</h2>
+                <h2>Entrar no Sistema</h2>
                 <form onSubmit={handleLogin}>
                     <input
                         type="email"

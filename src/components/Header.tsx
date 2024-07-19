@@ -41,7 +41,7 @@ const Header: React.FC = () => {
             Empresa: {tradeName}
           </Typography>
           <Button color="inherit" onClick={handleLogout} sx={{ marginLeft: '16px' }}>
-            Logout
+            SAIR
           </Button>
         </Box>
       </Toolbar>

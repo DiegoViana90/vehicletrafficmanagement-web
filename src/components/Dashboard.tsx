@@ -18,12 +18,14 @@ const Dashboard: React.FC = () => {
     return (
         <div style={{ display: 'flex' }}>
             <Sidebar />
-            <div style={{ flexGrow: 1, marginLeft: 240 }}>
+            <div className="dashboard">
                 <Header />
-                <main style={{ marginTop: 30, padding: 500 }}>
-                    {/* Conteúdo do dashboard aqui */}
-                    <h2>Bem-vindo ao Dashboard!</h2>
-                </main>
+                <div className="dashboard-content">
+                    <main className="dashboard-main">
+                        {/* Conteúdo do dashboard aqui */}
+                        <h2>Bem-vindo ao Dashboard!</h2>
+                    </main>
+                </div>
             </div>
         </div>
     );

@@ -5,10 +5,10 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import FuelIcon from '@mui/icons-material/LocalGasStation'; // Ícone de combustível
-import TrafficIcon from '@mui/icons-material/Traffic'; // Ícone de tráfego
-import DriverIcon from '@mui/icons-material/Person'; // Ícone de motorista
-import FineIcon from '@mui/icons-material/AttachMoney'; // Exemplo de ícone para multas
+import FuelIcon from '@mui/icons-material/LocalGasStation';
+import TrafficIcon from '@mui/icons-material/Traffic';
+import DriverIcon from '@mui/icons-material/Person'; 
+import FineIcon from '@mui/icons-material/AttachMoney';
 import Toolbar from '@mui/material/Toolbar';
 
 const drawerWidth = 240;

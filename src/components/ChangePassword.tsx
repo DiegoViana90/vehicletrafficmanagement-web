@@ -71,7 +71,7 @@ const ChangePassword: React.FC = () => {
     return (
         <div className="container">
             <div className="card">
-                <h2>Alterar Senha</h2>
+                <h2>Alterar senha temporária</h2>
                 <form onSubmit={handleChangePassword}>
                     <input
                         type="password"

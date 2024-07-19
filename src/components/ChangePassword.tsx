@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { changePassword } from '../services/api';
+import { logout } from '../actions/authActions';
 import './styles.css';
 
 const ChangePassword: React.FC = () => {
@@ -9,6 +11,7 @@ const ChangePassword: React.FC = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -35,19 +38,31 @@ const ChangePassword: React.FC = () => {
 
             const userId = Number(user.id);
 
-            const response = await changePassword({
+            await changePassword({
                 userId: userId,
                 randomPassword: currentPassword,
                 newPassword: newPassword
             });
 
-            if (response.status === 200) {
-                alert('Senha alterada com sucesso!');
-                navigate('/dashboard');
-            }
-        } catch (error) {
+            alert('Senha alterada com sucesso!');
+            const updatedUser = { ...user, isFirstAccess: false };
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+
+            // Limpar o estado global e redirecionar para a tela de login
+            dispatch(logout());
+            navigate('/login');
+        } catch (error: any) {
             console.error('Alteração de senha falhou:', error);
-            alert('Alteração de senha falhou, tente novamente.');
+
+            if (error.response) {
+                if (error.response.data) {
+                    alert(`Erro: ${error.response.data}`);
+                } else {
+                    alert(`Erro: ${error.response.status} - ${error.response.statusText}`);
+                }
+            } else {
+                alert('Alteração de senha falhou, tente novamente.');
+            }
         } finally {
             setLoading(false);
         }

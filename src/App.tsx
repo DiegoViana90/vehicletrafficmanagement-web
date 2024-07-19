@@ -1,34 +1,43 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import ChangePassword from './components/ChangePassword';
+import { RootState } from './store'; // Corrigido para o caminho correto do seu arquivo de store
 
-const Rotas: React.FC = () => {
-    // Função para verificar o acesso à página de mudança de senha
-    const checkAccess = () => {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        return user.isFirstAccess;
-    };
+const ProtectedRoute: React.FC<{ condition: boolean; redirectTo: string; children: React.ReactElement }> = ({ condition, redirectTo, children }) => {
+    return condition ? children : <Navigate to={redirectTo} />;
+};
+
+const App: React.FC = () => {
+    const user = useSelector((state: RootState) => state.auth.user);
+    const isFirstAccess = user?.isFirstAccess;
 
     return (
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<Login />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route 
+                    path="/dashboard" 
+                    element={
+                        <ProtectedRoute condition={!isFirstAccess} redirectTo="/change-password">
+                            <Dashboard />
+                        </ProtectedRoute>
+                    } 
+                />
                 <Route 
                     path="/change-password" 
                     element={
-                        checkAccess() 
-                        ? <ChangePassword /> 
-                        : <Navigate to="/login" />
+                        <ProtectedRoute condition={isFirstAccess} redirectTo="/dashboard">
+                            <ChangePassword />
+                        </ProtectedRoute>
                     } 
                 />
-                {/* Outras rotas conforme necessário */}
             </Routes>
         </BrowserRouter>
     );
 };
 
-export default Rotas;
+export default App;

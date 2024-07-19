@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login, getCompanyById } from '../services/api'; // Importe as funções login e getCompanyById do arquivo api.tsx
+import { useDispatch } from 'react-redux';
+import { login as loginAction } from '../actions/authActions';
+import { login, getCompanyById } from '../services/api';
 import './styles.css';
 
 const Login: React.FC = () => {
@@ -8,52 +10,61 @@ const Login: React.FC = () => {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('company');
+    }, []);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-    
+
         try {
             setLoading(true);
-    
-            const response = await login(email, password); 
-            const { token, companiesId, company, isFirstAccess, fullName, userId } = response;
-    
-            console.log(response);
-    
-            // Armazene o token e o usuário no localStorage
+
+            const response = await login(email, password);
+            const { token, userId, isFirstAccess, fullName, companiesId } = response;
+
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify({
-                id: Number(userId), // Garanta que é um número
-                companiesId,
-                company,
+                id: userId,
                 isFirstAccess,
-                fullName
+                fullName,
+                companiesId
             }));
-    
-            let companyName = fullName; // Default to fullName if company is null
+
             if (companiesId) {
-                console.log('entrei na validação do companiesId ele tem um Id');
                 const companyResponse = await getCompanyById(companiesId, token);
                 localStorage.setItem('company', JSON.stringify(companyResponse));
-                companyName = companyResponse.tradeName;
+                alert(`Seja bem-vindo, ${fullName}, da empresa ${companyResponse.tradeName}!`);
+            } else {
+                alert(`Seja bem-vindo, ${fullName}!`);
             }
-    
-            alert(`Seja bem-vindo, ${fullName}${companyName ? `, da empresa ${companyName}` : ''}!`);
-    
+
             if (isFirstAccess) {
+                dispatch(loginAction({ token, user: response }));
                 navigate('/change-password');
             } else {
+                dispatch(loginAction({ token, user: response }));
                 navigate('/dashboard');
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Login falhou:', error);
-            alert('Login Falhou, Verifique suas credenciais.');
+
+            let errorMessage = 'Ocorreu um erro desconhecido.';
+            if (error.response) {
+                errorMessage = error.response.data.Message || errorMessage;
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+
+            alert(errorMessage);
         } finally {
             setLoading(false);
         }
     };
-    
-    
 
     return (
         <div className="container">

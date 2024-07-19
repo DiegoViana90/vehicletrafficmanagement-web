@@ -27,6 +27,7 @@ const Sidebar: React.FC = () => {
                 '& .MuiDrawer-paper': {
                     width: drawerWidth,
                     boxSizing: 'border-box',
+                    zIndex: 1,  // Ajuste o zIndex aqui
                 },
             }}
             variant="permanent"

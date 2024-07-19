@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://192.168.0.112:7053/api/';
+const API_URL = 'http://192.168.100.12:7053/api/';
 
 interface AuthResponse {
     token: string;
@@ -45,6 +45,14 @@ export const getCompanyById = async (id: number, token: string): Promise<any> =>
 };
 
 export const changePassword = async (data: UpdatePasswordRequest): Promise<any> => {
-    const response = await axios.put(`${API_URL}auth/UpdateFirstPassword`, data);
-    return response.data;
+    try {
+        const response = await axios.put(`${API_URL}auth/UpdateFirstPassword`, data);
+        return response.data;
+    } catch (error: any) {
+        if (axios.isAxiosError(error) && error.response) {
+            throw new Error(error.response.data); 
+        } else {
+            throw error;
+        }
+    }
 };

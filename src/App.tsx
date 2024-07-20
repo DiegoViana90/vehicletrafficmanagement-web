@@ -1,4 +1,3 @@
-// App.tsx
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -11,6 +10,7 @@ import Fuel from './components/Fuel';
 import Fines from './components/Fines';
 import Contracts from './components/Contracts';
 import Companies from './components/Companies';
+import UpdateCompany from './components/UpdateCompany';
 import { RootState } from './store';
 
 interface ProtectedRouteProps {
@@ -73,7 +73,7 @@ const App: React.FC = () => {
                     }
                 />
                 <Route
-                    path="/Contracts"
+                    path="/contracts"
                     element={
                         <ProtectedRoute condition={isAuthenticated} redirectTo="/login">
                             <Contracts />
@@ -89,10 +89,33 @@ const App: React.FC = () => {
                     }
                 />
                 <Route
-                    path="/Companies"
+                    path="/companies"
                     element={
                         <ProtectedRoute condition={isAuthenticated} redirectTo="/login">
                             <Companies />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/update-company"
+                    element={
+                        <ProtectedRoute condition={isAuthenticated} redirectTo="/login">
+                            <UpdateCompany initialData={{
+                                cnpjCpf: '',
+                                name: '',
+                                tradeName: '',
+                                phoneNumber: '',
+                                email: '',
+                                cep: '',
+                                street: '',
+                                propertyNumber: '',
+                                addressComplement: '',
+                                district: '',
+                                city: '',
+                                state: '',
+                                country: 'Brasil',
+                                observations: ''
+                            }} />
                         </ProtectedRoute>
                     }
                 />

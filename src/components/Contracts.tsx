@@ -7,7 +7,7 @@ const Contracts: React.FC = () => {
 
     return (
         <Layout>
-            <main className="dashboard-main">
+            <main className="main-content">
                 <h1>Contracts </h1>
                 <h3>Contracts</h3>
             </main>

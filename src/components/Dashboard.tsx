@@ -18,7 +18,7 @@ const Dashboard: React.FC = () => {
 
     return (
         <Layout>
-            <main className="dashboard-main">
+            <main className="main-content">
                 <h1>Bem-vindo à {tradeName}</h1>
                 <h3>Sistema de Gerenciamento de veículos</h3>
             </main>

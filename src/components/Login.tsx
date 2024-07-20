@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { login as loginAction } from '../actions/authActions';
 import { login, getCompanyById } from '../services/api';
-import './styles.css';
+import './styles.css'; // Certifique-se que este arquivo contém os estilos atualizados.
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -77,7 +77,7 @@ const Login: React.FC = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="Email"
                         required
-                        className="input"
+                        className="login-input"
                     />
                     <input
                         type="password"
@@ -85,7 +85,7 @@ const Login: React.FC = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Senha"
                         required
-                        className="input"
+                        className="login-input"
                     />
                     <button type="submit" className="button-login" disabled={loading}>
                         {loading ? 'Carregando...' : 'Entrar'}

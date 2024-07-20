@@ -42,7 +42,7 @@ const Sidebar: React.FC = () => {
         { text: 'Motoristas', icon: <DriverIcon />, path: '/drivers' },
         { text: 'Multas', icon: <FineIcon />, path: '/fines' }, 
         { text: 'Contratos', icon: <DescriptionIcon />, path: '/contracts' }, 
-        { text: 'Empresas', icon: <BusinessIcon />, path: '/Companies' }, 
+        { text: 'Clientes', icon: <BusinessIcon />, path: '/Companies' }, 
     ];
 
     return (

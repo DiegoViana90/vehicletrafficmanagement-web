@@ -7,7 +7,7 @@ const Fuel: React.FC = () => {
 
     return (
         <Layout>
-            <main className="dashboard-main">
+            <main className="main-content">
                 <h1>COMBUSTIVEL</h1>
                 <h3>COMBUSTIVEL</h3>
             </main>

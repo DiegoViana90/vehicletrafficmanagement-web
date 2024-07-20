@@ -22,15 +22,17 @@ body {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  align-items: center; 
+  align-items: center;
 }
 
-.input {
-  width: 100%;
+/* Estilo uniforme para todos os inputs dentro do card */
+.card input {
+  width: 100%; /* Garante que todos os inputs ocupem toda a largura do card */
   padding: 10px;
   margin: 10px 0;
-  border-radius: 4px;
   border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box; /* Garante que padding e border estão dentro da largura definida */
 }
 
 .button-login {
@@ -81,15 +83,15 @@ body {
   display: flex;
   flex-direction: column;
   margin-left: 240px;
-  margin-top: 64px; 
+  margin-top: 64px;
   padding: 20px;
 }
 
 .dashboard-content {
   flex: 1;
   display: flex;
-  justify-content: center; 
-  align-items: center; 
+  justify-content: center;
+  align-items: center;
 }
 
 .dashboard-header {
@@ -97,22 +99,22 @@ body {
 }
 
 .dashboard-main {
-  margin-top: 20px;
-  padding-left: 300px; 
-  white-space: nowrap; 
-  overflow: hidden; 
-  text-overflow: ellipsis; 
+  margin-top: 100px;
+  padding-left: 600px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-@media (max-width: 1370px) {
+@media (max-width: 1360px) {
   .dashboard-main {
-    padding-left: 100px; 
+    padding-left: 300px;
   }
 }
 
 @media (max-width: 768px) {
   .dashboard-main {
-    padding-left: 50px;
+    padding-left: 2px;
   }
 }
 
@@ -120,4 +122,169 @@ body {
   .dashboard-main {
     padding-left: 20px;
   }
+}
+
+.traffic-main {
+  margin-top: 100px;
+  padding-left: 450px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 1360px) {
+  .traffic-main {
+    padding-left: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .traffic-main {
+    padding-left: 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  .traffic-main {
+    padding-left: 20px;
+  }
+}
+
+.fuel-main {
+  margin-top: 100px;
+  padding-left: 450px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 1360px) {
+  .fuel-main {
+    padding-left: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .fuel-main {
+    padding-left: 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  .fuel-main {
+    padding-left: 20px;
+  }
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 30vh;
+  margin: 0 auto;
+  padding-left: 700px;
+}
+
+@media (max-width: 1370px) {
+  .main-content {
+    padding-left: 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 0 5%;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 0 2%;
+  }
+}
+
+.companies-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 95vh;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Media queries para responsividade */
+@media (max-width: 1370px) {
+  .companies-content {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .companies-content {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .companies-content {
+    padding: 5px;
+  }
+}
+
+/* Estilo específico para os inputs do componente Companies */
+.companies-input {
+  width: 80%; /* Define a largura para ocupar 80% do espaço disponível no container */
+  padding: 8px; /* Espaçamento interno para maior legibilidade (ajuste conforme necessário) */
+  margin: 5px 0; /* Margem entre os campos (ajuste conforme necessário) */
+  border: 1px solid #ccc; /* Borda sutil (ajuste conforme necessário) */
+  border-radius: 4px; /* Bordas arredondadas para estética */
+  box-sizing: border-box; /* Inclui o padding e a borda na largura total, evitando expansões indesejadas */
+}
+
+textarea.companies-input {
+  height: 100px; /* Altura fixa para o textarea */
+  resize: none; /* Impede a alteração do tamanho do textarea */
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 50px; /* Margem acima do botão */
+}
+
+button:hover {
+  background-color: #000000; /* Efeito hover para o botão */
+}
+
+.submit-button {
+  width: 30%; /* Tamanho reduzido para não ocupar a largura total */
+  padding: 12px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 20px auto 0; /* Margem para centralizar o botão e espaçamento acima */
+  display: block; /* Garante que o botão apareça em sua própria linha */
+}
+
+.submit-button:hover {
+  background-color: #0056b3; /* Efeito hover para o botão */
+}
+
+.login-input {
+  width: 100%; /* Define a largura para ocupar todo o espaço disponível no container */
+  padding: 10px; /* Espaçamento interno para maior legibilidade */
+  margin: 10px 0; /* Margem entre os campos */
+  border: 1px solid #ddd; /* Borda sutil */
+  border-radius: 4px; /* Bordas arredondadas para estética */
+  box-sizing: border-box; /* Inclui o padding e a borda na largura total, evitando expansões indesejadas */
 }

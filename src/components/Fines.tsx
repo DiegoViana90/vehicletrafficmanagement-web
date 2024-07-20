@@ -7,7 +7,7 @@ const Fines: React.FC = () => {
 
     return (
         <Layout>
-            <main className="dashboard-main">
+            <main className="main-content">
                 <h1>MULTAS </h1>
                 <h3>MULTAS</h3>
             </main>

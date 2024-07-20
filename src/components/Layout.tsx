@@ -10,9 +10,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     return (
         <div style={{ display: 'flex' }}>
             <Sidebar />
-            <div className="dashboard">
+            <div>
                 <Header />
-                <div className="dashboard-content">
+                <div className="layout-content">
                     {children}
                 </div>
             </div>

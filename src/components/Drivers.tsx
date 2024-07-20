@@ -7,7 +7,7 @@ const Drivers: React.FC = () => {
 
     return (
         <Layout>
-            <main className="dashboard-main">
+            <main className="main-content">
                 <h1>Motoristas {tradeName}</h1>
                 <h3>Motoca</h3>
             </main>

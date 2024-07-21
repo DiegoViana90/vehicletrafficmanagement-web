@@ -10,7 +10,7 @@ import Fuel from './components/Fuel';
 import Fines from './components/Fines';
 import Contracts from './components/Contracts';
 import Companies from './components/Companies';
-import UpdateCompany from './components/UpdateCompany';
+import UpdateCompany from './components/UpdateCompany'; // Import the UpdateCompany component
 import { RootState } from './store';
 
 interface ProtectedRouteProps {
@@ -25,7 +25,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ condition, redirectTo, 
 
 const App: React.FC = () => {
     const user = useSelector((state: RootState) => state.auth.user);
-    const isAuthenticated = !!user;  // Verifica se o usuário está autenticado
+    const isAuthenticated = !!user;
 
     return (
         <BrowserRouter>
@@ -100,22 +100,7 @@ const App: React.FC = () => {
                     path="/update-company"
                     element={
                         <ProtectedRoute condition={isAuthenticated} redirectTo="/login">
-                            <UpdateCompany initialData={{
-                                cnpjCpf: '',
-                                name: '',
-                                tradeName: '',
-                                phoneNumber: '',
-                                email: '',
-                                cep: '',
-                                street: '',
-                                propertyNumber: '',
-                                addressComplement: '',
-                                district: '',
-                                city: '',
-                                state: '',
-                                country: 'Brasil',
-                                observations: ''
-                            }} />
+                            <UpdateCompany />
                         </ProtectedRoute>
                     }
                 />

@@ -260,9 +260,6 @@ button {
   margin-top: 50px; /* Margem acima do botão */
 }
 
-button:hover {
-  background-color: #000000; /* Efeito hover para o botão */
-}
 
 .submit-button {
   width: 30%; /* Tamanho reduzido para não ocupar a largura total */
@@ -303,3 +300,27 @@ button:hover {
   font-size: 24px;
   z-index: 1000;
 }
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.loading-message {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.readonly-input {
+  background-color: #f0f0f0;
+}
+

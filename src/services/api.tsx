@@ -20,6 +20,10 @@ interface UpdatePasswordRequest {
     newPassword: string;
 }
 
+interface GetCompanyByTaxNumberRequest {
+    TaxNumber: string;
+}
+
 export const login = async (email: string, password: string): Promise<AuthResponse> => {
     const response = await axios.post(`${API_URL}auth/Login`, { email, password });
     return response.data;
@@ -44,6 +48,23 @@ export const getCompanyById = async (id: number, token: string): Promise<any> =>
     }
 };
 
+export const getCompanyByTaxNumber = async (taxNumber: string): Promise<any> => {
+    try {
+        const response = await axios.post(`${API_URL}company/GetCompanyByTaxNumber`, {
+            TaxNumber: taxNumber
+        });
+
+        if (response.status !== 200) {
+            throw new Error(`Erro na requisição: ${response.status}`);
+        }
+
+        return response.data;
+    } catch (error) {
+        console.error('Erro ao chamar a API getCompanyByTaxNumber:', error);
+        throw error;
+    }
+};
+
 export const changePassword = async (data: UpdatePasswordRequest): Promise<any> => {
     try {
         const response = await axios.put(`${API_URL}auth/UpdateFirstPassword`, data);
@@ -56,3 +77,14 @@ export const changePassword = async (data: UpdatePasswordRequest): Promise<any> 
         }
     }
 };
+
+export const insertCompany = async (companyData: any) => {
+    const response = await axios.post(`${API_URL}company/InsertCompany`, companyData);
+    return response.data;
+};
+
+export const updateCompany = async (updateCompanyData: any) => {
+    const response = await axios.put(`${API_URL}company/UpdateCompanByTaxNumber`, updateCompanyData);
+    return response.data;
+};
+

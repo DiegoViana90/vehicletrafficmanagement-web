@@ -164,7 +164,7 @@ const Companies: React.FC = () => {
           )}
           <form onSubmit={handleSubmit}>
             <Grid container spacing={2}>
-              <Grid item xs={6}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="CNPJ OU CPF"
@@ -175,7 +175,7 @@ const Companies: React.FC = () => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="Nome do Cliente"
@@ -185,7 +185,7 @@ const Companies: React.FC = () => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="Nome Fantasia"
@@ -195,7 +195,7 @@ const Companies: React.FC = () => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="Telefone"
@@ -205,7 +205,7 @@ const Companies: React.FC = () => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="Email"
@@ -216,7 +216,7 @@ const Companies: React.FC = () => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="CEP"
@@ -226,7 +226,7 @@ const Companies: React.FC = () => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="Rua"
@@ -236,7 +236,7 @@ const Companies: React.FC = () => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="Número"
@@ -246,7 +246,7 @@ const Companies: React.FC = () => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="Complemento"
@@ -256,7 +256,7 @@ const Companies: React.FC = () => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="Bairro"
@@ -266,7 +266,7 @@ const Companies: React.FC = () => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="Cidade"
@@ -276,7 +276,7 @@ const Companies: React.FC = () => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="Estado"
@@ -286,7 +286,7 @@ const Companies: React.FC = () => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="País"

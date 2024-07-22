@@ -1,4 +1,3 @@
-// Sidebar.tsx
 import React from 'react';
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
@@ -14,6 +13,8 @@ import FineIcon from '@mui/icons-material/AttachMoney';
 import DescriptionIcon from '@mui/icons-material/Description'; 
 import Toolbar from '@mui/material/Toolbar';
 import BusinessIcon from '@mui/icons-material/Business'; 
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 interface NavigationItem {
   text: string;
@@ -21,13 +22,16 @@ interface NavigationItem {
   path: string;
 }
 
-const drawerWidth = 240;
+const drawerWidth = 280; // Aumentando a largura da sidebar
 
 const Sidebar: React.FC = () => {
     const navigate = useNavigate();
+    const theme = useTheme();
+    const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+
     const isAuthenticated = !!localStorage.getItem('token');
 
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !isDesktop) {
         return null;
     }
 

@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+import { Box, useMediaQuery, useTheme } from '@mui/material';
 import Sidebar from './Sidebar';
 import Header from './Header';
 
@@ -7,16 +8,17 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+    const theme = useTheme();
+    const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+
     return (
-        <div style={{ display: 'flex' }}>
-            <Sidebar />
-            <div>
-                <Header />
-                <div className="layout-content">
-                    {children}
-                </div>
-            </div>
-        </div>
+        <Box sx={{ display: 'flex' }}>
+            <Header />
+            {isDesktop && <Sidebar />}
+            <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
+                {children}
+            </Box>
+        </Box>
     );
 };
 

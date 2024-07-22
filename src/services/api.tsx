@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://192.168.100.12:7053/api/';
+const API_URL = 'http://192.168.0.112:7053/api/';
 
 interface AuthResponse {
     token: string;
@@ -16,12 +16,46 @@ interface AuthResponse {
 
 interface UpdatePasswordRequest {
     userId: number;
-    randomPassword: string; // Correspondente ao campo da API
+    randomPassword: string;
     newPassword: string;
 }
 
 interface GetCompanyByTaxNumberRequest {
     TaxNumber: string;
+}
+
+export interface InsertVehicleRequestDto {
+    VehicleModelId: number;
+    LicensePlate?: string;
+    Chassis: string;
+    Color: string;
+    FuelType: FuelType;
+    Mileage: number;
+    Status: VehicleStatus;
+    ContractId?: number;
+}
+
+export interface VehicleModelDtoResponse {
+    vehicleModelId: number;
+    modelName: string;
+    manufacturer: string;
+    observations?: string;
+}
+
+export enum FuelType {
+    Etanol = 0,
+    Gasolina = 1,
+    Flex = 2,
+    Diesel = 3,
+    Híbrido = 4,
+    Elétrico = 5,
+    Outros = 6
+}
+
+export enum VehicleStatus {
+    Livre = 0,
+    Contrato = 1,
+    Manutenção = 2
 }
 
 export const login = async (email: string, password: string): Promise<AuthResponse> => {
@@ -88,3 +122,17 @@ export const updateCompany = async (updateCompanyData: any) => {
     return response.data;
 };
 
+export const getAllVehicleModels = async (): Promise<VehicleModelDtoResponse[]> => {
+    const response = await axios.post(`${API_URL}vehicle/GetAllVehicleModel`);
+    return response.data;
+};
+
+export const insertVehicleModel = async (modelData: any) => {
+    const response = await axios.post(`${API_URL}vehicle/InsertVehicleModel`, modelData);
+    return response.data;
+};
+
+export const insertVehicle = async (vehicleData: InsertVehicleRequestDto) => {
+    const response = await axios.post(`${API_URL}vehicle/InsertVehicle`, vehicleData);
+    return response.data;
+};

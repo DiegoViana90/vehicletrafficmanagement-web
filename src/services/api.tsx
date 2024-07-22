@@ -77,3 +77,14 @@ export const changePassword = async (data: UpdatePasswordRequest): Promise<any> 
         }
     }
 };
+
+export const insertCompany = async (companyData: any) => {
+    const response = await axios.post(`${API_URL}company/InsertCompany`, companyData);
+    return response.data;
+};
+
+export const updateCompany = async (updateCompanyData: any) => {
+    const response = await axios.put(`${API_URL}company/UpdateCompanByTaxNumber`, updateCompanyData);
+    return response.data;
+};
+

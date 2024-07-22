@@ -260,10 +260,6 @@ button {
   margin-top: 50px; /* Margem acima do botão */
 }
 
-button:hover {
-  background-color: #000000; /* Efeito hover para o botão */
-}
-
 .submit-button {
   width: 30%; /* Tamanho reduzido para não ocupar a largura total */
   padding: 12px 20px;
@@ -322,3 +318,8 @@ button:hover {
   font-weight: bold;
   color: #333;
 }
+
+.readonly-input {
+  background-color: #f0f0f0;
+}
+

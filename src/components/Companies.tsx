@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Container, TextField, Button, Box, Typography, CircularProgress, Grid } from '@mui/material';
 import Layout from './Layout';
 import { formatCEPNumber, formatCNPJandCPF, formatPhoneNumber } from '../mask/mask';
-import { getCompanyByTaxNumber } from '../services/api';
+import { getCompanyByTaxNumber, insertCompany } from '../services/api';
 import { useDispatch } from 'react-redux';
 import { setExistingCompanyData } from '../reducers/companySlice';
 import { toast } from 'react-toastify';
@@ -41,10 +42,17 @@ const Companies: React.FC = () => {
     email: '',
     observations: '',
   });
+  
   const [loading, setLoading] = useState(false);
   const [showLoadingScreen, setShowLoadingScreen] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const validateForm = (data: CompanyData) => {
+    const { name, tradeName, taxNumber, cep, street, propertyNumber, district, city, state, country, phoneNumber, email } = data;
+    return !!(name && tradeName && taxNumber && cep && street && propertyNumber && district && city && state && country && phoneNumber && email);
+  };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = event.target;
@@ -62,9 +70,10 @@ const Companies: React.FC = () => {
       default:
         newValue = value;
     }
-    setCompanyData({
-      ...companyData,
-      [name]: newValue,
+    setCompanyData(prevState => {
+      const updatedData = { ...prevState, [name]: newValue };
+      setIsFormValid(validateForm(updatedData));
+      return updatedData;
     });
   };
 
@@ -76,67 +85,246 @@ const Companies: React.FC = () => {
 
   const checkCompanyExists = async (taxNumber: string) => {
     setLoading(true);
-    setShowLoadingScreen(true); // Show loading screen
+    setShowLoadingScreen(true);
 
     try {
       const startTime = Date.now();
       const response = await getCompanyByTaxNumber(taxNumber.replace(/\D/g, ''));
       const elapsedTime = Date.now() - startTime;
-      const remainingTime = 1000 - elapsedTime; // Ensure the loading screen shows for at least 1 second
+      const remainingTime = 800 - elapsedTime;
 
       if (response) {
         setTimeout(() => {
           dispatch(setExistingCompanyData(response));
-          setShowLoadingScreen(false); // Hide loading screen
+          setShowLoadingScreen(false);
           navigate('/update-company');
           toast.success('Cliente já está cadastrado.');
         }, remainingTime > 0 ? remainingTime : 0);
       } else {
         setTimeout(() => {
-          setShowLoadingScreen(false); // Hide loading screen
+          setShowLoadingScreen(false);
         }, remainingTime > 0 ? remainingTime : 0);
       }
     } catch (error) {
       console.log('Cliente não encontrado.');
-      setShowLoadingScreen(false); // Hide loading screen on error
-      toast.error('Cliente não encontrado.');
+      setShowLoadingScreen(false);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('Dados da Empresa:', companyData);
+    if (!isFormValid) {
+      toast.warn('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+    setLoading(true);
+    try {
+      await insertCompany(companyData);
+      toast.success('Empresa registrada com sucesso!');
+      setCompanyData({
+        name: '',
+        tradeName: '',
+        taxNumber: '',
+        cep: '',
+        street: '',
+        propertyNumber: '',
+        district: '',
+        city: '',
+        state: '',
+        country: 'Brasil',
+        addressComplement: '',
+        phoneNumber: '',
+        email: '',
+        observations: '',
+      });
+      setIsFormValid(false);
+    } catch (error) {
+      toast.error('Erro ao registrar a empresa.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <Layout>
-      <main className="companies-content">
-        {showLoadingScreen && (
-          <div className="loading-overlay">
-            <div className="loading-message">Carregando...</div>
-          </div>
-        )}
-        <h1>Cadastro de Clientes</h1>
-        <form onSubmit={handleSubmit}>
-          <input type="text" name="taxNumber" placeholder="CNPJ XX.XXX.XXX/XXXX-XX OU CPF XXX.XXX.XXX-XX" value={companyData.taxNumber} onChange={handleChange} className="companies-input" />
-          <input type="text" name="name" placeholder="Nome do Cliente" maxLength={60} value={companyData.name} onChange={handleChange} className="companies-input" />
-          <input type="text" name="tradeName" placeholder="Nome Fantasia" maxLength={50} value={companyData.tradeName} onChange={handleChange} className="companies-input" />
-          <input type="text" name="phoneNumber" placeholder="Telefone (XX)XXXXX-XXXX" value={companyData.phoneNumber} onChange={handleChange} className="companies-input" />
-          <input type="email" name="email" placeholder="Email" maxLength={50} value={companyData.email} onChange={handleChange} className="companies-input" />
-          <input type="text" name="cep" placeholder="CEP" value={companyData.cep} onChange={handleChange} className="companies-input" />
-          <input type="text" name="street" placeholder="Rua" maxLength={50} value={companyData.street} onChange={handleChange} className="companies-input" />
-          <input type="text" name="propertyNumber" placeholder="Número" maxLength={10} value={companyData.propertyNumber} onChange={handleChange} className="companies-input" />
-          <input type="text" name="addressComplement" placeholder="Complemento" maxLength={30} value={companyData.addressComplement} onChange={handleChange} className="companies-input" />
-          <input type="text" name="district" placeholder="Bairro" maxLength={30} value={companyData.district} onChange={handleChange} className="companies-input" />
-          <input type="text" name="city" placeholder="Cidade" maxLength={30} value={companyData.city} onChange={handleChange} className="companies-input" />
-          <input type="text" name="state" placeholder="Estado" maxLength={30} value={companyData.state} onChange={handleChange} className="companies-input" />
-          <input type="text" name="country" placeholder="País" maxLength={30} value={companyData.country} onChange={handleChange} className="companies-input" />
-          <textarea name="observations" placeholder="Observações" maxLength={100} value={companyData.observations} onChange={handleChange} className="companies-input"></textarea>
-          <button type="submit" className="submit-button">Registrar Empresa</button>
-        </form>
-      </main>
+      <Container maxWidth="md">
+        <Box mt={10}>
+          <Typography variant="h4" component="h1" gutterBottom>
+            Cadastro de Clientes
+          </Typography>
+          {showLoadingScreen && (
+            <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
+              <CircularProgress />
+              <Typography variant="h6" component="div" ml={2}>
+                Carregando...
+              </Typography>
+            </Box>
+          )}
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <TextField
+                  fullWidth
+                  label="CNPJ OU CPF"
+                  name="taxNumber"
+                  placeholder="CNPJ XX.XXX.XXX/XXXX-XX OU CPF XXX.XXX.XXX-XX"
+                  value={companyData.taxNumber}
+                  onChange={handleChange}
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  fullWidth
+                  label="Nome do Cliente"
+                  name="name"
+                  value={companyData.name}
+                  onChange={handleChange}
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  fullWidth
+                  label="Nome Fantasia"
+                  name="tradeName"
+                  value={companyData.tradeName}
+                  onChange={handleChange}
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  fullWidth
+                  label="Telefone"
+                  name="phoneNumber"
+                  value={companyData.phoneNumber}
+                  onChange={handleChange}
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  fullWidth
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={companyData.email}
+                  onChange={handleChange}
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  fullWidth
+                  label="CEP"
+                  name="cep"
+                  value={companyData.cep}
+                  onChange={handleChange}
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  fullWidth
+                  label="Rua"
+                  name="street"
+                  value={companyData.street}
+                  onChange={handleChange}
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  fullWidth
+                  label="Número"
+                  name="propertyNumber"
+                  value={companyData.propertyNumber}
+                  onChange={handleChange}
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  fullWidth
+                  label="Complemento"
+                  name="addressComplement"
+                  value={companyData.addressComplement}
+                  onChange={handleChange}
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  fullWidth
+                  label="Bairro"
+                  name="district"
+                  value={companyData.district}
+                  onChange={handleChange}
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  fullWidth
+                  label="Cidade"
+                  name="city"
+                  value={companyData.city}
+                  onChange={handleChange}
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  fullWidth
+                  label="Estado"
+                  name="state"
+                  value={companyData.state}
+                  onChange={handleChange}
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  fullWidth
+                  label="País"
+                  name="country"
+                  value={companyData.country}
+                  onChange={handleChange}
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Observações"
+                  name="observations"
+                  value={companyData.observations}
+                  onChange={handleChange}
+                  variant="outlined"
+                  multiline
+                  rows={4}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Box display="flex" justifyContent="center">
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    disabled={!isFormValid || loading}
+                  >
+                    {loading ? <CircularProgress size={24} /> : 'Registrar Empresa'}
+                  </Button>
+                </Box>
+              </Grid>
+            </Grid>
+          </form>
+        </Box>
+      </Container>
     </Layout>
   );
 };

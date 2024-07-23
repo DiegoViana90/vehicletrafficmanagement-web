@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { UserType, VehicleStatus, ContractStatus, CompanyStatus, FuelType, VehicleManufacturers } from '../constants/enum';
 
 const API_URL = 'http://192.168.0.112:7053/api/';
 
@@ -38,24 +39,8 @@ export interface InsertVehicleRequestDto {
 export interface VehicleModelDtoResponse {
     vehicleModelId: number;
     modelName: string;
-    manufacturer: string;
+    manufacturer: VehicleManufacturers;
     observations?: string;
-}
-
-export enum FuelType {
-    Etanol = 0,
-    Gasolina = 1,
-    Flex = 2,
-    Diesel = 3,
-    Híbrido = 4,
-    Elétrico = 5,
-    Outros = 6
-}
-
-export enum VehicleStatus {
-    Livre = 0,
-    Contrato = 1,
-    Manutenção = 2
 }
 
 export const login = async (email: string, password: string): Promise<AuthResponse> => {

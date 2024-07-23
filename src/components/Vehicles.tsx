@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Container, TextField, Button, Box, Typography, CircularProgress, Grid, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
+import React, { useState, useEffect, ChangeEvent } from 'react';
+import { Container, TextField, Button, Box, Typography, CircularProgress, Grid, MenuItem, Select, InputLabel, FormControl, Autocomplete, Dialog, DialogActions, DialogContent, DialogTitle, SelectChangeEvent } from '@mui/material';
+import { Add as AddIcon } from '@mui/icons-material';
 import Layout from './Layout';
-import { getAllVehicleModels, insertVehicle } from '../services/api';
+import { getAllVehicleModels, insertVehicle, insertVehicleModel } from '../services/api';
 import { toast } from 'react-toastify';
-import { VehicleModelDtoResponse, InsertVehicleRequestDto, FuelType, VehicleStatus } from '../services/api';
+import { VehicleModelDtoResponse, InsertVehicleRequestDto } from '../services/api';
+import { VehicleStatus, FuelType, VehicleManufacturers } from '../constants/enum';
 
 const Vehicles: React.FC = () => {
   const [vehicleModels, setVehicleModels] = useState<VehicleModelDtoResponse[]>([]);
@@ -13,17 +15,24 @@ const Vehicles: React.FC = () => {
     LicensePlate: '',
     Chassis: '',
     Color: '',
-    FuelType: FuelType.Flex,
+    FuelType: FuelType['Selecione uma Opção'],
     Mileage: 0,
-    Status: VehicleStatus.Livre,
+    Status: VehicleStatus['Selecione uma Opção'], 
     ContractId: undefined,
   });
 
   const [isFormValid, setIsFormValid] = useState(false);
+  const [query, setQuery] = useState<string>('');
+  const [open, setOpen] = useState(false);
+  const [newVehicleModel, setNewVehicleModel] = useState({
+    modelName: '',
+    manufacturer: 0,
+    observations: ''
+  });
 
   useEffect(() => {
     fetchVehicleModels();
-  }, []);
+  }, [query]);
 
   const fetchVehicleModels = async () => {
     setLoading(true);
@@ -37,15 +46,33 @@ const Vehicles: React.FC = () => {
     }
   };
 
-  const handleSelectChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
-    const { name, value } = event.target;
+  const handleModelChange = (event: any, newValue: VehicleModelDtoResponse | null) => {
     setVehicleData((prevData) => ({
       ...prevData,
-      [name as string]: Number(value),
+      VehicleModelId: newValue ? newValue.vehicleModelId : 0,
     }));
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleSelectChange = (event: SelectChangeEvent<number>, child: React.ReactNode) => {
+    const { name, value } = event.target;
+  
+    setVehicleData((prevData) => {
+      if (name === 'Status') {
+        return {
+          ...prevData,
+          [name as string]: Number(value),
+          ContractId: value === VehicleStatus['Em Contrato'] ? prevData.ContractId : undefined,
+        };
+      }
+  
+      return {
+        ...prevData,
+        [name as string]: Number(value),
+      };
+    });
+  };
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = event.target;
     setVehicleData((prevData) => ({
       ...prevData,
@@ -53,7 +80,7 @@ const Vehicles: React.FC = () => {
     }));
   };
 
-  const handleLicensePlateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLicensePlateChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     const formattedValue = value
       .toUpperCase()
@@ -66,7 +93,7 @@ const Vehicles: React.FC = () => {
     }));
   };
 
-  const handleChassisChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChassisChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     const formattedValue = value.toUpperCase().slice(0, 17);
     setVehicleData((prevData) => ({
@@ -78,7 +105,21 @@ const Vehicles: React.FC = () => {
   const validateForm = () => {
     const isLicensePlateValid = vehicleData.LicensePlate?.replace(/[^A-Z0-9]/g, '').length === 7;
     const isChassisValid = vehicleData.Chassis?.length === 17;
-    setIsFormValid(isLicensePlateValid && isChassisValid);
+    const isColorValid = vehicleData.Color.trim() !== '';
+    const isFuelTypeValid = vehicleData.FuelType !== undefined;
+    const isMileageValid = vehicleData.Mileage > 0;
+    const isStatusValid = vehicleData.Status !== undefined;
+    const isContractIdValid = vehicleData.Status === VehicleStatus['Em Contrato'] ? vehicleData.ContractId !== undefined : true;
+    
+    setIsFormValid(
+      isLicensePlateValid &&
+      isChassisValid &&
+      isColorValid &&
+      isFuelTypeValid &&
+      isMileageValid &&
+      isStatusValid &&
+      isContractIdValid
+    );
   };
 
   useEffect(() => {
@@ -96,13 +137,38 @@ const Vehicles: React.FC = () => {
         LicensePlate: '',
         Chassis: '',
         Color: '',
-        FuelType: FuelType.Flex,
+        FuelType: FuelType['Selecione uma Opção'], // Valor padrão
         Mileage: 0,
-        Status: VehicleStatus.Livre,
+        Status: VehicleStatus['Selecione uma Opção'], // Valor padrão
         ContractId: undefined,
       });
     } catch (error) {
       toast.error('Erro ao inserir veículo.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  const handleNewModelChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<number>) => {
+    const { name, value } = event.target;
+    setNewVehicleModel((prevData) => ({
+      ...prevData,
+      [name as string]: value,
+    }));
+  };
+
+  const handleInsertNewModel = async () => {
+    setLoading(true);
+    try {
+      await insertVehicleModel(newVehicleModel);
+      toast.success('Modelo de veículo inserido com sucesso!');
+      handleClose();
+      fetchVehicleModels();
+    } catch (error) {
+      toast.error('Erro ao inserir modelo de veículo.');
     } finally {
       setLoading(false);
     }
@@ -145,33 +211,34 @@ const Vehicles: React.FC = () => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid item xs={12}>
-                <FormControl fullWidth variant="outlined">
-                  <InputLabel>Modelo de Veículo</InputLabel>
-                  <Select
-                    name="VehicleModelId"
-                    value={vehicleData.VehicleModelId}
-                    onChange={(event) => handleSelectChange(event as React.ChangeEvent<{ name?: string; value: unknown }>)}
-                    label="Modelo de Veículo"
-                    displayEmpty
-                    renderValue={(selected) => {
-                      if (!selected) {
-                        return <em>Selecione um modelo de veículo</em>;
-                      }
-                      const selectedModel = vehicleModels.find(model => model.vehicleModelId === selected);
-                      return selectedModel ? `${selectedModel.modelName} | ${selectedModel.manufacturer} | ${selectedModel.observations}` : 'Selecione um modelo de veículo';
-                    }}
+              <Grid item xs={12} sm={6}>
+                <Autocomplete
+                  options={vehicleModels}
+                  getOptionLabel={(option) => `${option.modelName} | ${VehicleManufacturers[option.manufacturer]} | ${option.observations}`}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Modelo de Veículo"
+                      variant="outlined"
+                      onChange={(e) => setQuery(e.target.value)}
+                    />
+                  )}
+                  onChange={handleModelChange}
+                  loading={loading}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Box display="flex" justifyContent="flex-end" alignItems="center" height="100%">
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="success"
+                    startIcon={<AddIcon />}
+                    onClick={handleOpen}
                   >
-                    <MenuItem value="" disabled>
-                      Selecione um modelo de veículo
-                    </MenuItem>
-                    {vehicleModels.map((model) => (
-                      <MenuItem key={model.vehicleModelId} value={model.vehicleModelId}>
-                        {`${model.modelName} | ${model.manufacturer} | ${model.observations}`}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                    Adicionar NOVO Modelo
+                  </Button>
+                </Box>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -189,7 +256,7 @@ const Vehicles: React.FC = () => {
                   <Select
                     name="FuelType"
                     value={vehicleData.FuelType}
-                    onChange={(event) => handleSelectChange(event as React.ChangeEvent<{ name?: string; value: unknown }>)}
+                    onChange={(event, child) => handleSelectChange(event as SelectChangeEvent<number>, child)}
                     label="Tipo de Combustível"
                   >
                     {Object.keys(FuelType)
@@ -219,7 +286,7 @@ const Vehicles: React.FC = () => {
                   <Select
                     name="Status"
                     value={vehicleData.Status}
-                    onChange={(event) => handleSelectChange(event as React.ChangeEvent<{ name?: string; value: unknown }>)}
+                    onChange={(event, child) => handleSelectChange(event as SelectChangeEvent<number>, child)}
                     label="Status"
                   >
                     {Object.keys(VehicleStatus)
@@ -241,6 +308,7 @@ const Vehicles: React.FC = () => {
                   value={vehicleData.ContractId !== undefined ? vehicleData.ContractId : ''}
                   onChange={handleChange}
                   variant="outlined"
+                  disabled={vehicleData.Status !== VehicleStatus['Em Contrato']}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -259,6 +327,53 @@ const Vehicles: React.FC = () => {
           </form>
         </Box>
       </Container>
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>Adicionar Novo Modelo de Veículo</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Modelo de Veículo"
+            name="modelName"
+            fullWidth
+            value={newVehicleModel.modelName}
+            onChange={handleNewModelChange}
+          />
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Montadora</InputLabel>
+            <Select
+              name="manufacturer"
+              value={newVehicleModel.manufacturer}
+              onChange={(event) => handleNewModelChange(event as SelectChangeEvent<number>)}
+              label="Montadora"
+            >
+              {Object.keys(VehicleManufacturers)
+                .filter((key) => isNaN(Number(key)))
+                .map((key) => (
+                  <MenuItem key={key} value={VehicleManufacturers[key as keyof typeof VehicleManufacturers]}>
+                    {key}
+                  </MenuItem>
+                ))}
+            </Select>
+          </FormControl>
+          <TextField
+            margin="dense"
+            label="Observações"
+            name="observations"
+            fullWidth
+            value={newVehicleModel.observations}
+            onChange={handleNewModelChange}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handleInsertNewModel} color="primary" variant="contained">
+            Inserir
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Layout>
   );
 };

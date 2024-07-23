@@ -1,3 +1,4 @@
+
 import axios from 'axios';
 import { UserType, VehicleStatus, ContractStatus, CompanyStatus, FuelType, VehicleManufacturers } from '../constants/enum';
 
@@ -25,6 +26,20 @@ interface GetCompanyByTaxNumberRequest {
     TaxNumber: string;
 }
 
+export interface GetVehicleDto {
+    id: number;
+    vehicleModelId: number;
+    licensePlate: string;
+    chassis: string;
+    color: string;
+    fuelType: FuelType;
+    mileage: number;
+    status: VehicleStatus;
+    contractId?: number; 
+    modelYear: string;
+    manufactureYear: string;
+}
+
 export interface InsertVehicleRequestDto {
     VehicleModelId: number;
     LicensePlate?: string;
@@ -34,6 +49,8 @@ export interface InsertVehicleRequestDto {
     Mileage: number;
     Status: VehicleStatus;
     ContractId?: number;
+    ModelYear: string;
+    ManufactureYear: string;
 }
 
 export interface VehicleModelDtoResponse {
@@ -120,4 +137,16 @@ export const insertVehicleModel = async (modelData: any) => {
 export const insertVehicle = async (vehicleData: InsertVehicleRequestDto) => {
     const response = await axios.post(`${API_URL}vehicle/InsertVehicle`, vehicleData);
     return response.data;
+};
+
+export const getVehicleByChassis = async (chassis: string): Promise<GetVehicleDto | null> => {
+    try {
+        const response = await axios.post(`${API_URL}vehicle/GetVehicleByChassis`, {
+            Chassis: chassis
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Erro ao buscar veículo pelo chassi:', error);
+        return null;
+    }
 };

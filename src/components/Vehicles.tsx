@@ -1,10 +1,30 @@
 import React, { useState, useEffect, ChangeEvent } from 'react';
-import { Container, TextField, Button, Box, Typography, CircularProgress, Grid, MenuItem, Select, InputLabel, FormControl, Autocomplete, Dialog, DialogActions, DialogContent, DialogTitle, SelectChangeEvent } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
+import {
+  Container,
+  TextField,
+  Button,
+  Box,
+  Typography,
+  CircularProgress,
+  Grid,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  Autocomplete,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Tooltip,
+  IconButton,
+  SelectChangeEvent
+} from '@mui/material';
+import { Add as AddIcon, Close as CloseIcon } from '@mui/icons-material';
 import Layout from './Layout';
-import { getAllVehicleModels, insertVehicle, insertVehicleModel } from '../services/api';
+import { getAllVehicleModels, insertVehicle, insertVehicleModel, getVehicleByChassis } from '../services/api';
 import { toast } from 'react-toastify';
-import { VehicleModelDtoResponse, InsertVehicleRequestDto } from '../services/api';
+import { VehicleModelDtoResponse, InsertVehicleRequestDto, GetVehicleDto } from '../services/api';
 import { VehicleStatus, FuelType, VehicleManufacturers } from '../constants/enum';
 
 const Vehicles: React.FC = () => {
@@ -17,8 +37,10 @@ const Vehicles: React.FC = () => {
     Color: '',
     FuelType: FuelType['Selecione uma Opção'],
     Mileage: 0,
-    Status: VehicleStatus['Selecione uma Opção'], 
+    Status: VehicleStatus['Selecione uma Opção'],
     ContractId: undefined,
+    ManufactureYear: '',
+    ModelYear: ''
   });
 
   const [isFormValid, setIsFormValid] = useState(false);
@@ -29,10 +51,45 @@ const Vehicles: React.FC = () => {
     manufacturer: 0,
     observations: ''
   });
+  const [fieldsDisabled, setFieldsDisabled] = useState(false);
+  const [isInsertModelLoading, setIsInsertModelLoading] = useState(false);
 
   useEffect(() => {
     fetchVehicleModels();
   }, [query]);
+
+  useEffect(() => {
+    const fetchVehicle = async () => {
+      if (vehicleData.Chassis.length === 17) {
+        try {
+          const response: GetVehicleDto | null = await getVehicleByChassis(vehicleData.Chassis);
+          if (response) {
+            setVehicleData((prevData) => ({
+              ...prevData,
+              VehicleModelId: response.vehicleModelId,
+              LicensePlate: response.licensePlate,
+              Color: response.color,
+              FuelType: response.fuelType,
+              Mileage: response.mileage,
+              Status: response.status,
+              ContractId: response.contractId,
+              ManufactureYear: response.manufactureYear,
+              ModelYear: response.modelYear
+            }));
+            toast.success('Veículo já cadastrado.');
+            setFieldsDisabled(true);
+          }
+        } catch (error) {
+          console.error('Erro ao buscar veículo por chassi:', error);
+          toast.error('Erro ao buscar veículo por chassi.');
+        }
+      } else {
+        setFieldsDisabled(false);
+      }
+    };
+
+    fetchVehicle();
+  }, [vehicleData.Chassis]);
 
   const fetchVehicleModels = async () => {
     setLoading(true);
@@ -53,21 +110,21 @@ const Vehicles: React.FC = () => {
     }));
   };
 
-  const handleSelectChange = (event: SelectChangeEvent<number>, child: React.ReactNode) => {
+  const handleSelectChange = (event: any) => {
     const { name, value } = event.target;
-  
+
     setVehicleData((prevData) => {
       if (name === 'Status') {
         return {
           ...prevData,
-          [name as string]: Number(value),
+          [name]: Number(value),
           ContractId: value === VehicleStatus['Em Contrato'] ? prevData.ContractId : undefined,
         };
       }
-  
+
       return {
         ...prevData,
-        [name as string]: Number(value),
+        [name]: Number(value),
       };
     });
   };
@@ -102,15 +159,30 @@ const Vehicles: React.FC = () => {
     }));
   };
 
+  const handleYearChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    const numericValue = value.replace(/\D/g, ''); // Remove caracteres não numéricos
+
+    if (numericValue.length <= 4) {
+      setVehicleData((prevData) => ({
+        ...prevData,
+        [name]: numericValue,
+      }));
+    }
+  };
+
   const validateForm = () => {
     const isLicensePlateValid = vehicleData.LicensePlate?.replace(/[^A-Z0-9]/g, '').length === 7;
     const isChassisValid = vehicleData.Chassis?.length === 17;
-    const isColorValid = vehicleData.Color.trim() !== '';
-    const isFuelTypeValid = vehicleData.FuelType !== undefined;
+    const isColorValid = vehicleData.Color?.trim() !== '';
+    const isFuelTypeValid = vehicleData.FuelType !== FuelType['Selecione uma Opção'];
     const isMileageValid = vehicleData.Mileage > 0;
-    const isStatusValid = vehicleData.Status !== undefined;
+    const isStatusValid = vehicleData.Status !== VehicleStatus['Selecione uma Opção'];
     const isContractIdValid = vehicleData.Status === VehicleStatus['Em Contrato'] ? vehicleData.ContractId !== undefined : true;
-    
+    const isModelValid = vehicleData.VehicleModelId !== 0;
+    const isManufactureYearValid = vehicleData.ManufactureYear?.trim() !== '';
+    const isModelYearValid = vehicleData.ModelYear?.trim() !== '';
+
     setIsFormValid(
       isLicensePlateValid &&
       isChassisValid &&
@@ -118,7 +190,10 @@ const Vehicles: React.FC = () => {
       isFuelTypeValid &&
       isMileageValid &&
       isStatusValid &&
-      isContractIdValid
+      isContractIdValid &&
+      isModelValid &&
+      isManufactureYearValid &&
+      isModelYearValid
     );
   };
 
@@ -132,16 +207,7 @@ const Vehicles: React.FC = () => {
     try {
       await insertVehicle(vehicleData);
       toast.success('Veículo inserido com sucesso!');
-      setVehicleData({
-        VehicleModelId: 0,
-        LicensePlate: '',
-        Chassis: '',
-        Color: '',
-        FuelType: FuelType['Selecione uma Opção'], // Valor padrão
-        Mileage: 0,
-        Status: VehicleStatus['Selecione uma Opção'], // Valor padrão
-        ContractId: undefined,
-      });
+      clearForm();
     } catch (error) {
       toast.error('Erro ao inserir veículo.');
     } finally {
@@ -149,7 +215,31 @@ const Vehicles: React.FC = () => {
     }
   };
 
-  const handleOpen = () => setOpen(true);
+  const clearForm = () => {
+    setVehicleData({
+      VehicleModelId: 0,
+      LicensePlate: '',
+      Chassis: '',
+      Color: '',
+      FuelType: FuelType['Selecione uma Opção'],
+      Mileage: 0,
+      Status: VehicleStatus['Selecione uma Opção'],
+      ContractId: undefined,
+      ManufactureYear: '',
+      ModelYear: ''
+    });
+    setFieldsDisabled(false);
+  };
+
+  const handleOpen = () => {
+    setNewVehicleModel({
+      modelName: '',
+      manufacturer: 0,
+      observations: ''
+    });
+    setOpen(true);
+  };
+
   const handleClose = () => setOpen(false);
 
   const handleNewModelChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<number>) => {
@@ -161,16 +251,20 @@ const Vehicles: React.FC = () => {
   };
 
   const handleInsertNewModel = async () => {
-    setLoading(true);
+    setIsInsertModelLoading(true);
     try {
       await insertVehicleModel(newVehicleModel);
       toast.success('Modelo de veículo inserido com sucesso!');
-      handleClose();
+      setNewVehicleModel({
+        modelName: '',
+        manufacturer: 0,
+        observations: ''
+      });
       fetchVehicleModels();
     } catch (error) {
       toast.error('Erro ao inserir modelo de veículo.');
     } finally {
-      setLoading(false);
+      setIsInsertModelLoading(false);
     }
   };
 
@@ -199,6 +293,7 @@ const Vehicles: React.FC = () => {
                   value={vehicleData.LicensePlate}
                   onChange={handleLicensePlateChange}
                   variant="outlined"
+                  disabled={fieldsDisabled}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -209,18 +304,28 @@ const Vehicles: React.FC = () => {
                   value={vehicleData.Chassis}
                   onChange={handleChassisChange}
                   variant="outlined"
+                  disabled={fieldsDisabled}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Autocomplete
                   options={vehicleModels}
-                  getOptionLabel={(option) => `${option.modelName} | ${VehicleManufacturers[option.manufacturer]} | ${option.observations}`}
+                  getOptionLabel={(option) => option.modelName}
+                  renderOption={(props, option) => (
+                    <Tooltip title={`${option.modelName} | ${VehicleManufacturers[option.manufacturer]} | ${option.observations}`}>
+                      <Box component="li" {...props}>
+                        {option.modelName}
+                      </Box>
+                    </Tooltip>
+                  )}
                   renderInput={(params) => (
                     <TextField
                       {...params}
                       label="Modelo de Veículo"
                       variant="outlined"
                       onChange={(e) => setQuery(e.target.value)}
+                      value={vehicleModels.find(vm => vm.vehicleModelId === vehicleData.VehicleModelId)?.modelName || ''}
+                      disabled={fieldsDisabled}
                     />
                   )}
                   onChange={handleModelChange}
@@ -236,9 +341,35 @@ const Vehicles: React.FC = () => {
                     startIcon={<AddIcon />}
                     onClick={handleOpen}
                   >
-                    Adicionar NOVO Modelo
+                    Adicionar Novo Modelo
                   </Button>
                 </Box>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Ano Fabricação"
+                  name="ManufactureYear"
+                  type="number"
+                  value={vehicleData.ManufactureYear}
+                  onChange={handleYearChange}
+                  variant="outlined"
+                  disabled={fieldsDisabled}
+                  inputProps={{ maxLength: 4 }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Ano Modelo"
+                  name="ModelYear"
+                  type="number"
+                  value={vehicleData.ModelYear}
+                  onChange={handleYearChange}
+                  variant="outlined"
+                  disabled={fieldsDisabled}
+                  inputProps={{ maxLength: 4 }}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -248,6 +379,7 @@ const Vehicles: React.FC = () => {
                   value={vehicleData.Color}
                   onChange={handleChange}
                   variant="outlined"
+                  disabled={fieldsDisabled}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -256,8 +388,9 @@ const Vehicles: React.FC = () => {
                   <Select
                     name="FuelType"
                     value={vehicleData.FuelType}
-                    onChange={(event, child) => handleSelectChange(event as SelectChangeEvent<number>, child)}
+                    onChange={handleSelectChange}
                     label="Tipo de Combustível"
+                    disabled={fieldsDisabled}
                   >
                     {Object.keys(FuelType)
                       .filter((key) => isNaN(Number(key)))
@@ -278,6 +411,7 @@ const Vehicles: React.FC = () => {
                   value={vehicleData.Mileage}
                   onChange={handleChange}
                   variant="outlined"
+                  disabled={fieldsDisabled}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -286,8 +420,9 @@ const Vehicles: React.FC = () => {
                   <Select
                     name="Status"
                     value={vehicleData.Status}
-                    onChange={(event, child) => handleSelectChange(event as SelectChangeEvent<number>, child)}
+                    onChange={handleSelectChange}
                     label="Status"
+                    disabled={fieldsDisabled}
                   >
                     {Object.keys(VehicleStatus)
                       .filter((key) => isNaN(Number(key)))
@@ -308,7 +443,7 @@ const Vehicles: React.FC = () => {
                   value={vehicleData.ContractId !== undefined ? vehicleData.ContractId : ''}
                   onChange={handleChange}
                   variant="outlined"
-                  disabled={vehicleData.Status !== VehicleStatus['Em Contrato']}
+                  disabled={vehicleData.Status !== VehicleStatus['Em Contrato'] || fieldsDisabled}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -317,7 +452,7 @@ const Vehicles: React.FC = () => {
                     type="submit"
                     variant="contained"
                     color="primary"
-                    disabled={loading || !isFormValid}
+                    disabled={loading || !isFormValid || fieldsDisabled}
                   >
                     {loading ? <CircularProgress size={24} /> : 'Inserir Veículo'}
                   </Button>
@@ -328,23 +463,23 @@ const Vehicles: React.FC = () => {
         </Box>
       </Container>
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Adicionar Novo Modelo de Veículo</DialogTitle>
+        <DialogTitle>
+          Adicionar Novo Modelo de Veículo
+          <IconButton
+            aria-label="close"
+            onClick={handleClose}
+            sx={{ position: 'absolute', right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
         <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Modelo de Veículo"
-            name="modelName"
-            fullWidth
-            value={newVehicleModel.modelName}
-            onChange={handleNewModelChange}
-          />
           <FormControl fullWidth margin="dense">
             <InputLabel>Montadora</InputLabel>
             <Select
               name="manufacturer"
               value={newVehicleModel.manufacturer}
-              onChange={(event) => handleNewModelChange(event as SelectChangeEvent<number>)}
+              onChange={handleNewModelChange}
               label="Montadora"
             >
               {Object.keys(VehicleManufacturers)
@@ -357,6 +492,15 @@ const Vehicles: React.FC = () => {
             </Select>
           </FormControl>
           <TextField
+            autoFocus
+            margin="dense"
+            label="Modelo de Veículo"
+            name="modelName"
+            fullWidth
+            value={newVehicleModel.modelName}
+            onChange={handleNewModelChange}
+          />
+          <TextField
             margin="dense"
             label="Observações"
             name="observations"
@@ -366,11 +510,11 @@ const Vehicles: React.FC = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">
+          <Button onClick={handleClose} color="primary" disabled={isInsertModelLoading}>
             Cancelar
           </Button>
-          <Button onClick={handleInsertNewModel} color="primary" variant="contained">
-            Inserir
+          <Button onClick={handleInsertNewModel} color="primary" variant="contained" disabled={isInsertModelLoading || newVehicleModel.modelName.trim() === ''}>
+            {isInsertModelLoading ? <CircularProgress size={24} /> : 'Inserir'}
           </Button>
         </DialogActions>
       </Dialog>

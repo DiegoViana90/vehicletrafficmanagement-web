@@ -1,8 +1,7 @@
-
 import axios from 'axios';
 import { UserType, VehicleStatus, ContractStatus, CompanyStatus, FuelType, VehicleManufacturers } from '../constants/enum';
 
-const API_URL = 'http://192.168.0.112:7053/api/';
+const API_URL = process.env.REACT_APP_API_URL;
 
 interface AuthResponse {
     token: string;

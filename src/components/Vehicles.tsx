@@ -22,7 +22,7 @@ import {
 } from '@mui/material';
 import { Add as AddIcon, Close as CloseIcon } from '@mui/icons-material';
 import Layout from './Layout';
-import { getAllVehicleModels, insertVehicle, insertVehicleModel, getVehicleByChassis } from '../services/api';
+import { getAllVehicleModels, insertVehicle, insertVehicleModel, getVehicleByChassis, getVehicleByLicensePlate } from '../services/api';
 import { toast } from 'react-toastify';
 import { VehicleModelDtoResponse, InsertVehicleRequestDto, GetVehicleDto } from '../services/api';
 import { VehicleStatus, FuelType, VehicleManufacturers } from '../constants/enum';
@@ -40,7 +40,7 @@ const Vehicles: React.FC = () => {
     Status: VehicleStatus['Selecione uma Opção'],
     ContractId: undefined,
     ManufactureYear: '',
-    ModelYear: ''
+    ModelYear: '',
   });
 
   const [isFormValid, setIsFormValid] = useState(false);
@@ -53,14 +53,53 @@ const Vehicles: React.FC = () => {
   });
   const [fieldsDisabled, setFieldsDisabled] = useState(false);
   const [isInsertModelLoading, setIsInsertModelLoading] = useState(false);
+  const [hasFetchedVehicle, setHasFetchedVehicle] = useState(false);
+  const [selectedVehicleModel, setSelectedVehicleModel] = useState<string>('');
 
   useEffect(() => {
     fetchVehicleModels();
   }, [query]);
 
   useEffect(() => {
+    const fetchVehicleByLicensePlate = async () => {
+      if (vehicleData.LicensePlate && vehicleData.LicensePlate.replace(/[^A-Z0-9]/g, '').length === 7) {
+        try {
+          const response: GetVehicleDto | null = await getVehicleByLicensePlate(vehicleData.LicensePlate);
+          if (response) {
+            setVehicleData((prevData) => ({
+              ...prevData,
+              VehicleModelId: response.vehicleModelId,
+              LicensePlate: response.licensePlate,
+              Chassis: response.chassis,
+              Color: response.color,
+              FuelType: response.fuelType,
+              Mileage: response.mileage,
+              Status: response.status,
+              ContractId: response.contractId,
+              ManufactureYear: response.manufactureYear,
+              ModelYear: response.modelYear,
+              Observation: response.observations
+            }));
+            setSelectedVehicleModel(`${response.modelName} | ${VehicleManufacturers[response.manufacturer]} | ${response.observations}`);
+            setHasFetchedVehicle(true);
+            toast.success('Veículo já cadastrado.');
+            setFieldsDisabled(true);
+          }
+        } catch (error) {
+          console.error('Erro ao buscar veículo por placa:', error);
+          toast.error('Erro ao buscar veículo por placa.');
+        }
+      }
+    };
+
+    if (!hasFetchedVehicle) {
+      fetchVehicleByLicensePlate();
+    }
+  }, [vehicleData.LicensePlate, hasFetchedVehicle]);
+
+  useEffect(() => {
     const fetchVehicle = async () => {
-      if (vehicleData.Chassis.length === 17) {
+      if (vehicleData.Chassis.length === 17 && !hasFetchedVehicle) {
         try {
           const response: GetVehicleDto | null = await getVehicleByChassis(vehicleData.Chassis);
           if (response) {
@@ -68,14 +107,18 @@ const Vehicles: React.FC = () => {
               ...prevData,
               VehicleModelId: response.vehicleModelId,
               LicensePlate: response.licensePlate,
+              Chassis: response.chassis,
               Color: response.color,
               FuelType: response.fuelType,
               Mileage: response.mileage,
               Status: response.status,
               ContractId: response.contractId,
               ManufactureYear: response.manufactureYear,
-              ModelYear: response.modelYear
+              ModelYear: response.modelYear,
+              Observation: response.observations
             }));
+            setSelectedVehicleModel(`${response.modelName} | ${VehicleManufacturers[response.manufacturer]} | ${response.observations}`);
+            setHasFetchedVehicle(true);
             toast.success('Veículo já cadastrado.');
             setFieldsDisabled(true);
           }
@@ -88,8 +131,10 @@ const Vehicles: React.FC = () => {
       }
     };
 
-    fetchVehicle();
-  }, [vehicleData.Chassis]);
+    if (!hasFetchedVehicle) {
+      fetchVehicle();
+    }
+  }, [vehicleData.Chassis, hasFetchedVehicle]);
 
   const fetchVehicleModels = async () => {
     setLoading(true);
@@ -148,6 +193,7 @@ const Vehicles: React.FC = () => {
       ...prevData,
       [name]: formattedValue,
     }));
+    setHasFetchedVehicle(false); // Reset the flag to allow fetching when license plate changes
   };
 
   const handleChassisChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -157,6 +203,7 @@ const Vehicles: React.FC = () => {
       ...prevData,
       [name]: formattedValue,
     }));
+    setHasFetchedVehicle(false); // Reset the flag to allow fetching when chassis changes
   };
 
   const handleYearChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -229,6 +276,8 @@ const Vehicles: React.FC = () => {
       ModelYear: ''
     });
     setFieldsDisabled(false);
+    setHasFetchedVehicle(false); // Reset the flag to allow fetching
+    setSelectedVehicleModel(''); // Clear the selected vehicle model display
   };
 
   const handleOpen = () => {
@@ -273,7 +322,7 @@ const Vehicles: React.FC = () => {
       <Container maxWidth="md">
         <Box mt={10}>
           <Typography variant="h4" component="h1" gutterBottom>
-            Inserção de Veículos
+            Adicionar Veículos
           </Typography>
           {loading && (
             <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
@@ -308,29 +357,39 @@ const Vehicles: React.FC = () => {
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Autocomplete
-                  options={vehicleModels}
-                  getOptionLabel={(option) => option.modelName}
-                  renderOption={(props, option) => (
-                    <Tooltip title={`${option.modelName} | ${VehicleManufacturers[option.manufacturer]} | ${option.observations}`}>
-                      <Box component="li" {...props}>
-                        {option.modelName}
-                      </Box>
-                    </Tooltip>
-                  )}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Modelo de Veículo"
-                      variant="outlined"
-                      onChange={(e) => setQuery(e.target.value)}
-                      value={vehicleModels.find(vm => vm.vehicleModelId === vehicleData.VehicleModelId)?.modelName || ''}
-                      disabled={fieldsDisabled}
-                    />
-                  )}
-                  onChange={handleModelChange}
-                  loading={loading}
-                />
+                {fieldsDisabled ? (
+                  <TextField
+                    fullWidth
+                    label="Modelo de Veículo"
+                    value={selectedVehicleModel}
+                    variant="outlined"
+                    disabled
+                  />
+                ) : (
+                  <Autocomplete
+                    options={vehicleModels}
+                    getOptionLabel={(option) => `${option.modelName} | ${VehicleManufacturers[option.manufacturer]} | ${option.observations}`}
+                    renderOption={(props, option) => (
+                      <Tooltip title={`${option.modelName} | ${VehicleManufacturers[option.manufacturer]} | ${option.observations}`}>
+                        <Box component="li" {...props}>
+                          {option.modelName}
+                        </Box>
+                      </Tooltip>
+                    )}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Modelo de Veículo"
+                        variant="outlined"
+                        onChange={(e) => setQuery(e.target.value)}
+                        value={vehicleModels.find(vm => vm.vehicleModelId === vehicleData.VehicleModelId)?.modelName || ''}
+                        disabled={fieldsDisabled}
+                      />
+                    )}
+                    onChange={handleModelChange}
+                    loading={loading}
+                  />
+                )}
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Box display="flex" justifyContent="flex-end" alignItems="center" height="100%">
@@ -340,6 +399,7 @@ const Vehicles: React.FC = () => {
                     color="success"
                     startIcon={<AddIcon />}
                     onClick={handleOpen}
+                    disabled={fieldsDisabled}
                   >
                     Adicionar Novo Modelo
                   </Button>
@@ -403,18 +463,6 @@ const Vehicles: React.FC = () => {
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Quilometragem"
-                  name="Mileage"
-                  type="number"
-                  value={vehicleData.Mileage}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={fieldsDisabled}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
                 <FormControl fullWidth variant="outlined">
                   <InputLabel>Status</InputLabel>
                   <Select
@@ -434,7 +482,7 @@ const Vehicles: React.FC = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="ID do Contrato"
@@ -446,8 +494,20 @@ const Vehicles: React.FC = () => {
                   disabled={vehicleData.Status !== VehicleStatus['Em Contrato'] || fieldsDisabled}
                 />
               </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Quilometragem"
+                  name="Mileage"
+                  type="number"
+                  value={vehicleData.Mileage}
+                  onChange={handleChange}
+                  variant="outlined"
+                  disabled={fieldsDisabled}
+                />
+              </Grid>
               <Grid item xs={12}>
-                <Box display="flex" justifyContent="center">
+                <Box display="flex" justifyContent="center" gap={2}>
                   <Button
                     type="submit"
                     variant="contained"
@@ -455,6 +515,15 @@ const Vehicles: React.FC = () => {
                     disabled={loading || !isFormValid || fieldsDisabled}
                   >
                     {loading ? <CircularProgress size={24} /> : 'Inserir Veículo'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="contained"
+                    color="secondary"
+                    onClick={clearForm}
+                    disabled={loading}
+                  >
+                    Limpar Campos
                   </Button>
                 </Box>
               </Grid>

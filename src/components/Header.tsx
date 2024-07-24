@@ -10,6 +10,7 @@ import DriverIcon from '@mui/icons-material/Person';
 import FineIcon from '@mui/icons-material/AttachMoney';
 import DescriptionIcon from '@mui/icons-material/Description'; 
 import BusinessIcon from '@mui/icons-material/Business'; 
+import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
@@ -50,6 +51,7 @@ const Header: React.FC = () => {
     { text: 'Multas', icon: <FineIcon />, path: '/fines' }, 
     { text: 'Contratos', icon: <DescriptionIcon />, path: '/contracts' }, 
     { text: 'Clientes', icon: <BusinessIcon />, path: '/Companies' }, 
+    { text: 'Veículos', icon: <DirectionsCarIcon />, path: '/vehicles' },
   ];
 
   return (

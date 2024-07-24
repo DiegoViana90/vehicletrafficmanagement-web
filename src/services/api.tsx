@@ -1,4 +1,6 @@
+
 import axios from 'axios';
+import { UserType, VehicleStatus, ContractStatus, CompanyStatus, FuelType, VehicleManufacturers } from '../constants/enum';
 
 const API_URL = 'http://192.168.100.12:7053/api/';
 
@@ -16,12 +18,49 @@ interface AuthResponse {
 
 interface UpdatePasswordRequest {
     userId: number;
-    randomPassword: string; // Correspondente ao campo da API
+    randomPassword: string;
     newPassword: string;
 }
 
 interface GetCompanyByTaxNumberRequest {
     TaxNumber: string;
+}
+
+export interface GetVehicleDto {
+    id: number;
+    vehicleModelId: number;
+    licensePlate: string;
+    chassis: string;
+    color: string;
+    fuelType: FuelType;
+    mileage: number;
+    status: VehicleStatus;
+    contractId?: number; 
+    modelYear: string;
+    manufactureYear: string;
+    modelName: string;
+    manufacturer: VehicleManufacturers;
+    observations: string;
+}
+
+export interface InsertVehicleRequestDto {
+    VehicleModelId: number;
+    LicensePlate?: string;
+    Chassis: string;
+    Color: string;
+    FuelType: FuelType;
+    Mileage: number;
+    Status: VehicleStatus;
+    ContractId?: number;
+    ModelYear: string;
+    ManufactureYear: string;
+}
+
+export interface VehicleModelDtoResponse {
+    vehicleModelId: number;
+    modelName: string;
+    manufacturer: VehicleManufacturers;
+    observations?: string;
 }
 
 export const login = async (email: string, password: string): Promise<AuthResponse> => {
@@ -88,3 +127,41 @@ export const updateCompany = async (updateCompanyData: any) => {
     return response.data;
 };
 
+export const getAllVehicleModels = async (): Promise<VehicleModelDtoResponse[]> => {
+    const response = await axios.post(`${API_URL}vehicle/GetAllVehicleModel`);
+    return response.data;
+};
+
+export const insertVehicleModel = async (modelData: any) => {
+    const response = await axios.post(`${API_URL}vehicle/InsertVehicleModel`, modelData);
+    return response.data;
+};
+
+export const insertVehicle = async (vehicleData: InsertVehicleRequestDto) => {
+    const response = await axios.post(`${API_URL}vehicle/InsertVehicle`, vehicleData);
+    return response.data;
+};
+
+export const getVehicleByChassis = async (chassis: string): Promise<GetVehicleDto | null> => {
+    try {
+        const response = await axios.post(`${API_URL}vehicle/GetVehicleByChassis`, {
+            Chassis: chassis
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Erro ao buscar veículo pelo chassi:', error);
+        return null;
+    }
+};
+
+export const getVehicleByLicensePlate = async (licensePlate: string): Promise<GetVehicleDto | null> => {
+    try {
+      const response = await axios.post(`${API_URL}vehicle/GetVehicleByLicensePlate`, {
+        LicensePlate: licensePlate
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao buscar veículo pela placa:', error);
+      return null;
+    }
+  };

@@ -1,3 +1,4 @@
+// App.tsx
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -10,7 +11,8 @@ import Fuel from './components/Fuel';
 import Fines from './components/Fines';
 import Contracts from './components/Contracts';
 import Companies from './components/Companies';
-import UpdateCompany from './components/UpdateCompany'; // Import the UpdateCompany component
+import UpdateCompany from './components/UpdateCompany';
+import Vehicles from './components/Vehicles';
 import { RootState } from './store';
 
 interface ProtectedRouteProps {
@@ -101,6 +103,14 @@ const App: React.FC = () => {
                     element={
                         <ProtectedRoute condition={isAuthenticated} redirectTo="/login">
                             <UpdateCompany />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/vehicles"
+                    element={
+                        <ProtectedRoute condition={isAuthenticated} redirectTo="/login">
+                            <Vehicles />
                         </ProtectedRoute>
                     }
                 />

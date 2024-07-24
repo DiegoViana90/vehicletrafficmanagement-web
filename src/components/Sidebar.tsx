@@ -11,8 +11,9 @@ import TrafficIcon from '@mui/icons-material/Traffic';
 import DriverIcon from '@mui/icons-material/Person'; 
 import FineIcon from '@mui/icons-material/AttachMoney';
 import DescriptionIcon from '@mui/icons-material/Description'; 
-import Toolbar from '@mui/material/Toolbar';
 import BusinessIcon from '@mui/icons-material/Business'; 
+import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import Toolbar from '@mui/material/Toolbar';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
@@ -22,7 +23,7 @@ interface NavigationItem {
   path: string;
 }
 
-const drawerWidth = 280; // Aumentando a largura da sidebar
+const drawerWidth = 280;
 
 const Sidebar: React.FC = () => {
     const navigate = useNavigate();
@@ -47,6 +48,7 @@ const Sidebar: React.FC = () => {
         { text: 'Multas', icon: <FineIcon />, path: '/fines' }, 
         { text: 'Contratos', icon: <DescriptionIcon />, path: '/contracts' }, 
         { text: 'Clientes', icon: <BusinessIcon />, path: '/Companies' }, 
+        { text: 'Veículos', icon: <DirectionsCarIcon />, path: '/vehicles' },
     ];
 
     return (

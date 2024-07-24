@@ -164,3 +164,15 @@ export const getVehicleByLicensePlate = async (licensePlate: string): Promise<Ge
       return null;
     }
   };
+
+export const getVehicleByQRCode = async (qrCode: string): Promise<GetVehicleDto | null> => {
+    try {
+        const response = await axios.post(`${API_URL}vehicle/GetVehicleByQRCode`, {
+            QRCode: qrCode
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Erro ao buscar veículo pelo QR code:', error);
+        return null;
+    }
+};

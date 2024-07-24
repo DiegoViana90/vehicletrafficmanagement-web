@@ -20,7 +20,8 @@ import {
   IconButton,
   SelectChangeEvent
 } from '@mui/material';
-import { Add as AddIcon, Close as CloseIcon } from '@mui/icons-material';
+import { Add as AddIcon, Close as CloseIcon, Search as SearchIcon } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import Layout from './Layout';
 import { getAllVehicleModels, insertVehicle, insertVehicleModel, getVehicleByChassis, getVehicleByLicensePlate } from '../services/api';
 import { toast } from 'react-toastify';
@@ -28,6 +29,7 @@ import { VehicleModelDtoResponse, InsertVehicleRequestDto, GetVehicleDto } from 
 import { VehicleStatus, FuelType, VehicleManufacturers } from '../constants/enum';
 
 const Vehicles: React.FC = () => {
+  const navigate = useNavigate();
   const [vehicleModels, setVehicleModels] = useState<VehicleModelDtoResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [vehicleData, setVehicleData] = useState<InsertVehicleRequestDto>({
@@ -320,216 +322,224 @@ const Vehicles: React.FC = () => {
   return (
     <Layout>
       <Container maxWidth="md">
-        <Box mt={10}>
+        <Box mt={10} display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h4" component="h1" gutterBottom>
             Adicionar Veículos
           </Typography>
-          {loading && (
-            <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
-              <CircularProgress />
-              <Typography variant="h6" component="div" ml={2}>
-                Carregando...
-              </Typography>
-            </Box>
-          )}
-          <form onSubmit={handleSubmit}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Placa"
-                  name="LicensePlate"
-                  value={vehicleData.LicensePlate}
-                  onChange={handleLicensePlateChange}
-                  variant="outlined"
-                  disabled={fieldsDisabled}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Chassi"
-                  name="Chassis"
-                  value={vehicleData.Chassis}
-                  onChange={handleChassisChange}
-                  variant="outlined"
-                  disabled={fieldsDisabled}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                {fieldsDisabled ? (
-                  <TextField
-                    fullWidth
-                    label="Modelo de Veículo"
-                    value={selectedVehicleModel}
-                    variant="outlined"
-                    disabled
-                  />
-                ) : (
-                  <Autocomplete
-                    options={vehicleModels}
-                    getOptionLabel={(option) => `${option.modelName} | ${VehicleManufacturers[option.manufacturer]} | ${option.observations}`}
-                    renderOption={(props, option) => (
-                      <Tooltip title={`${option.modelName} | ${VehicleManufacturers[option.manufacturer]} | ${option.observations}`}>
-                        <Box component="li" {...props}>
-                          {option.modelName}
-                        </Box>
-                      </Tooltip>
-                    )}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Modelo de Veículo"
-                        variant="outlined"
-                        onChange={(e) => setQuery(e.target.value)}
-                        value={vehicleModels.find(vm => vm.vehicleModelId === vehicleData.VehicleModelId)?.modelName || ''}
-                        disabled={fieldsDisabled}
-                      />
-                    )}
-                    onChange={handleModelChange}
-                    loading={loading}
-                  />
-                )}
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Box display="flex" justifyContent="flex-end" alignItems="center" height="100%">
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="success"
-                    startIcon={<AddIcon />}
-                    onClick={handleOpen}
-                    disabled={fieldsDisabled}
-                  >
-                    Adicionar Novo Modelo
-                  </Button>
-                </Box>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Ano Fabricação"
-                  name="ManufactureYear"
-                  type="number"
-                  value={vehicleData.ManufactureYear}
-                  onChange={handleYearChange}
-                  variant="outlined"
-                  disabled={fieldsDisabled}
-                  inputProps={{ maxLength: 4 }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Ano Modelo"
-                  name="ModelYear"
-                  type="number"
-                  value={vehicleData.ModelYear}
-                  onChange={handleYearChange}
-                  variant="outlined"
-                  disabled={fieldsDisabled}
-                  inputProps={{ maxLength: 4 }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Cor"
-                  name="Color"
-                  value={vehicleData.Color}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={fieldsDisabled}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth variant="outlined">
-                  <InputLabel>Tipo de Combustível</InputLabel>
-                  <Select
-                    name="FuelType"
-                    value={vehicleData.FuelType}
-                    onChange={handleSelectChange}
-                    label="Tipo de Combustível"
-                    disabled={fieldsDisabled}
-                  >
-                    {Object.keys(FuelType)
-                      .filter((key) => isNaN(Number(key)))
-                      .map((key) => (
-                        <MenuItem key={key} value={FuelType[key as keyof typeof FuelType]}>
-                          {key}
-                        </MenuItem>
-                      ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth variant="outlined">
-                  <InputLabel>Status</InputLabel>
-                  <Select
-                    name="Status"
-                    value={vehicleData.Status}
-                    onChange={handleSelectChange}
-                    label="Status"
-                    disabled={fieldsDisabled}
-                  >
-                    {Object.keys(VehicleStatus)
-                      .filter((key) => isNaN(Number(key)))
-                      .map((key) => (
-                        <MenuItem key={key} value={VehicleStatus[key as keyof typeof VehicleStatus]}>
-                          {key}
-                        </MenuItem>
-                      ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="ID do Contrato"
-                  name="ContractId"
-                  type="number"
-                  value={vehicleData.ContractId !== undefined ? vehicleData.ContractId : ''}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={vehicleData.Status !== VehicleStatus['Em Contrato'] || fieldsDisabled}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Quilometragem"
-                  name="Mileage"
-                  type="number"
-                  value={vehicleData.Mileage}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={fieldsDisabled}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <Box display="flex" justifyContent="center" gap={2}>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    disabled={loading || !isFormValid || fieldsDisabled}
-                  >
-                    {loading ? <CircularProgress size={24} /> : 'Inserir Veículo'}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="contained"
-                    color="secondary"
-                    onClick={clearForm}
-                    disabled={loading}
-                  >
-                    Limpar Campos
-                  </Button>
-                </Box>
-              </Grid>
-            </Grid>
-          </form>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<SearchIcon />}
+            onClick={() => navigate('/search-vehicle')}
+          >
+            Buscar Veículos
+          </Button>
         </Box>
+        {loading && (
+          <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
+            <CircularProgress />
+            <Typography variant="h6" component="div" ml={2}>
+              Carregando...
+            </Typography>
+          </Box>
+        )}
+        <form onSubmit={handleSubmit}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Placa"
+                name="LicensePlate"
+                value={vehicleData.LicensePlate}
+                onChange={handleLicensePlateChange}
+                variant="outlined"
+                disabled={fieldsDisabled}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Chassi"
+                name="Chassis"
+                value={vehicleData.Chassis}
+                onChange={handleChassisChange}
+                variant="outlined"
+                disabled={fieldsDisabled}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              {fieldsDisabled ? (
+                <TextField
+                  fullWidth
+                  label="Modelo de Veículo"
+                  value={selectedVehicleModel}
+                  variant="outlined"
+                  disabled
+                />
+              ) : (
+                <Autocomplete
+                  options={vehicleModels}
+                  getOptionLabel={(option) => `${option.modelName} | ${VehicleManufacturers[option.manufacturer]} | ${option.observations}`}
+                  renderOption={(props, option) => (
+                    <Tooltip title={`${option.modelName} | ${VehicleManufacturers[option.manufacturer]} | ${option.observations}`}>
+                      <Box component="li" {...props}>
+                        {option.modelName}
+                      </Box>
+                    </Tooltip>
+                  )}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Modelo de Veículo"
+                      variant="outlined"
+                      onChange={(e) => setQuery(e.target.value)}
+                      value={vehicleModels.find(vm => vm.vehicleModelId === vehicleData.VehicleModelId)?.modelName || ''}
+                      disabled={fieldsDisabled}
+                    />
+                  )}
+                  onChange={handleModelChange}
+                  loading={loading}
+                />
+              )}
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Box display="flex" justifyContent="flex-end" alignItems="center" height="100%">
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="success"
+                  startIcon={<AddIcon />}
+                  onClick={handleOpen}
+                  disabled={fieldsDisabled}
+                >
+                  Adicionar Novo Modelo
+                </Button>
+              </Box>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Ano Fabricação"
+                name="ManufactureYear"
+                type="number"
+                value={vehicleData.ManufactureYear}
+                onChange={handleYearChange}
+                variant="outlined"
+                disabled={fieldsDisabled}
+                inputProps={{ maxLength: 4 }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Ano Modelo"
+                name="ModelYear"
+                type="number"
+                value={vehicleData.ModelYear}
+                onChange={handleYearChange}
+                variant="outlined"
+                disabled={fieldsDisabled}
+                inputProps={{ maxLength: 4 }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Cor"
+                name="Color"
+                value={vehicleData.Color}
+                onChange={handleChange}
+                variant="outlined"
+                disabled={fieldsDisabled}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel>Tipo de Combustível</InputLabel>
+                <Select
+                  name="FuelType"
+                  value={vehicleData.FuelType}
+                  onChange={handleSelectChange}
+                  label="Tipo de Combustível"
+                  disabled={fieldsDisabled}
+                >
+                  {Object.keys(FuelType)
+                    .filter((key) => isNaN(Number(key)))
+                    .map((key) => (
+                      <MenuItem key={key} value={FuelType[key as keyof typeof FuelType]}>
+                        {key}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel>Status</InputLabel>
+                <Select
+                  name="Status"
+                  value={vehicleData.Status}
+                  onChange={handleSelectChange}
+                  label="Status"
+                  disabled={fieldsDisabled}
+                >
+                  {Object.keys(VehicleStatus)
+                    .filter((key) => isNaN(Number(key)))
+                    .map((key) => (
+                      <MenuItem key={key} value={VehicleStatus[key as keyof typeof VehicleStatus]}>
+                        {key}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="ID do Contrato"
+                name="ContractId"
+                type="number"
+                value={vehicleData.ContractId !== undefined ? vehicleData.ContractId : ''}
+                onChange={handleChange}
+                variant="outlined"
+                disabled={vehicleData.Status !== VehicleStatus['Em Contrato'] || fieldsDisabled}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Quilometragem"
+                name="Mileage"
+                type="number"
+                value={vehicleData.Mileage}
+                onChange={handleChange}
+                variant="outlined"
+                disabled={fieldsDisabled}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Box display="flex" justifyContent="center" gap={2}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  disabled={loading || !isFormValid || fieldsDisabled}
+                >
+                  {loading ? <CircularProgress size={24} /> : 'Inserir Veículo'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="contained"
+                  color="secondary"
+                  onClick={clearForm}
+                  disabled={loading}
+                >
+                  Limpar Campos
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        </form>
       </Container>
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>

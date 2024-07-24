@@ -37,6 +37,9 @@ export interface GetVehicleDto {
     contractId?: number; 
     modelYear: string;
     manufactureYear: string;
+    modelName: string;
+    manufacturer: VehicleManufacturers;
+    observations: string;
 }
 
 export interface InsertVehicleRequestDto {
@@ -149,3 +152,15 @@ export const getVehicleByChassis = async (chassis: string): Promise<GetVehicleDt
         return null;
     }
 };
+
+export const getVehicleByLicensePlate = async (licensePlate: string): Promise<GetVehicleDto | null> => {
+    try {
+      const response = await axios.post(`${API_URL}vehicle/GetVehicleByLicensePlate`, {
+        LicensePlate: licensePlate
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao buscar veículo pela placa:', error);
+      return null;
+    }
+  };

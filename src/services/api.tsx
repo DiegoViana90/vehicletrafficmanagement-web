@@ -1,8 +1,7 @@
-
 import axios from 'axios';
 import { UserType, VehicleStatus, ContractStatus, CompanyStatus, FuelType, VehicleManufacturers } from '../constants/enum';
 
-const API_URL = 'http://192.168.100.12:7053/api/';
+const API_URL = process.env.REACT_APP_API_URL;
 
 interface AuthResponse {
     token: string;
@@ -165,3 +164,15 @@ export const getVehicleByLicensePlate = async (licensePlate: string): Promise<Ge
       return null;
     }
   };
+
+export const getVehicleByQRCode = async (qrCode: string): Promise<GetVehicleDto | null> => {
+    try {
+        const response = await axios.post(`${API_URL}vehicle/GetVehicleByQRCode`, {
+            QRCode: qrCode
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Erro ao buscar veículo pelo QR code:', error);
+        return null;
+    }
+};

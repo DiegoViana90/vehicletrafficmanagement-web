@@ -195,7 +195,7 @@ const Vehicles: React.FC = () => {
       ...prevData,
       [name]: formattedValue,
     }));
-    setHasFetchedVehicle(false); // Reset the flag to allow fetching when license plate changes
+    setHasFetchedVehicle(false);
   };
 
   const handleChassisChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -205,12 +205,12 @@ const Vehicles: React.FC = () => {
       ...prevData,
       [name]: formattedValue,
     }));
-    setHasFetchedVehicle(false); // Reset the flag to allow fetching when chassis changes
+    setHasFetchedVehicle(false);
   };
 
   const handleYearChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    const numericValue = value.replace(/\D/g, ''); // Remove caracteres não numéricos
+    const numericValue = value.replace(/\D/g, '');
 
     if (numericValue.length <= 4) {
       setVehicleData((prevData) => ({
@@ -293,6 +293,10 @@ const Vehicles: React.FC = () => {
 
   const handleClose = () => setOpen(false);
 
+  const trimTrailingSpaces = (str: string): string => {
+    return str.replace(/\s+$/, '');
+  };
+
   const handleNewModelChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<number>) => {
     const { name, value } = event.target;
     setNewVehicleModel((prevData) => ({
@@ -304,7 +308,13 @@ const Vehicles: React.FC = () => {
   const handleInsertNewModel = async () => {
     setIsInsertModelLoading(true);
     try {
-      await insertVehicleModel(newVehicleModel);
+      const trimmedVehicleModel = {
+        ...newVehicleModel,
+        modelName: trimTrailingSpaces(newVehicleModel.modelName),
+        observations: trimTrailingSpaces(newVehicleModel.observations)
+      };
+
+      await insertVehicleModel(trimmedVehicleModel);
       toast.success('Modelo de veículo inserido com sucesso!');
       setNewVehicleModel({
         modelName: '',
@@ -475,12 +485,12 @@ const Vehicles: React.FC = () => {
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth variant="outlined">
-                <InputLabel>Status</InputLabel>
+                <InputLabel>Status do Veículo</InputLabel>
                 <Select
                   name="Status"
                   value={vehicleData.Status}
                   onChange={handleSelectChange}
-                  label="Status"
+                  label="Status do Veículo"
                   disabled={fieldsDisabled}
                 >
                   {Object.keys(VehicleStatus)

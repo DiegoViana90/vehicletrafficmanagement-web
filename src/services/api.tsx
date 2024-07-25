@@ -217,8 +217,8 @@ export const getAllVehicles = async (): Promise<GetVehicleDto[]> => {
     return response.data;
 };
 
-export const getAllClients = async (): Promise<ClientDto[]> => {
-  const response = await axios.get(`${API_URL}clients`);
+export const getAllCompanies = async (): Promise<ClientDto[]> => {
+  const response = await axios.get(`${API_URL}company/GetAllCompanies`);
   return response.data;
 };
 

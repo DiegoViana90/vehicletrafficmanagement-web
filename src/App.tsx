@@ -6,13 +6,14 @@ import Dashboard from './components/Dashboard';
 import ChangePassword from './components/ChangePassword';
 import Drivers from './components/Drivers';
 import VehicleTraffic from './components/VehicleTraffic';
-import Fuel from './components/Fuel';
 import Fines from './components/Fines';
+import Fuel from './components/Fuel';
 import Contracts from './components/Contracts';
 import Companies from './components/Companies';
 import UpdateCompany from './components/UpdateCompany';
 import Vehicles from './components/Vehicles';
 import SearchVehicle from './components/SearchVehicle';
+import UpdateContract from './components/UpdateContract';
 import { RootState } from './store';
 
 interface ProtectedRouteProps {
@@ -119,6 +120,14 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute condition={isAuthenticated} redirectTo="/login">
               <SearchVehicle />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/update-contract"
+          element={
+            <ProtectedRoute condition={isAuthenticated} redirectTo="/login">
+              <UpdateContract />
             </ProtectedRoute>
           }
         />

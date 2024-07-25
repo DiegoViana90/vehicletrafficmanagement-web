@@ -1,5 +1,3 @@
-// services/api.ts
-
 import axios from 'axios';
 import { UserType, VehicleStatus, ContractStatus, CompanyStatus, FuelType, VehicleManufacturers } from '../constants/enum';
 
@@ -10,7 +8,7 @@ export interface InsertContractRequestDto {
   ClientCompanyId: number;
   StartDate: string;
   EndDate?: string;
-  Status: string;
+  Status: ContractStatus;
   VehicleIds: number[];
 }
 
@@ -20,7 +18,8 @@ export interface ContractDto {
   clientCompanyId: number;
   startDate: string;
   endDate?: string;
-  status: string;
+  status: ContractStatus;
+  vehicleIds: number[];
 }
 
 interface AuthResponse {
@@ -89,6 +88,7 @@ export interface VehicleDto {
 
 export interface ClientDto {
   id: number;
+  companiesId: number;
   name: string;
 }
 
@@ -224,4 +224,13 @@ export const getAllCompanies = async (): Promise<ClientDto[]> => {
 
 export const insertContract = async (contractData: InsertContractRequestDto): Promise<void> => {
   await axios.post(`${API_URL}contract/InsertContract`, contractData);
+};
+
+export const getContractByCompanyName = async (data: { Name: string }): Promise<ContractDto> => {
+  const response = await axios.post(`${API_URL}contract/GetContractByCompanyName`, data);
+  return response.data;
+};
+
+export const updateContract = async (contractData: InsertContractRequestDto): Promise<void> => {
+  await axios.put(`${API_URL}contract/UpdateContract`, contractData);
 };

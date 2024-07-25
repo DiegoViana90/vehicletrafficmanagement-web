@@ -7,12 +7,10 @@ import {
   Typography,
   CircularProgress,
   Grid,
-  Autocomplete,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Tooltip,
   IconButton,
   Table,
   TableBody,
@@ -29,128 +27,68 @@ import {
 import { Add as AddIcon, Close as CloseIcon } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import Layout from './Layout';
-import { getAllVehicles, getAllCompanies, insertContract, getContractByCompanyName } from '../services/api';
-import { GetVehicleDto, ClientDto, InsertContractRequestDto, ContractDto } from '../services/api';
-import { useNavigate } from 'react-router-dom';
+import { getAllVehicles, updateContract } from '../services/api';
+import { GetVehicleDto, ContractDto, InsertContractRequestDto } from '../services/api';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ContractStatus, VehicleStatus, VehicleManufacturers } from '../constants/enum';
 
-const Contracts: React.FC = () => {
+const UpdateContract: React.FC = () => {
   const navigate = useNavigate();
-  const company = JSON.parse(localStorage.getItem('company') || '{}');
-  const serviceProviderCompanyId = company.id;
+  const location = useLocation();
+  const contract: ContractDto = location.state?.contract;
+
   const [vehicles, setVehicles] = useState<GetVehicleDto[]>([]);
-  const [clients, setClients] = useState<ClientDto[]>([]);
   const [selectedVehicles, setSelectedVehicles] = useState<GetVehicleDto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
-  const [existingContract, setExistingContract] = useState<ContractDto | null>(null);
-  const [showContractDialog, setShowContractDialog] = useState(false);
   const [formData, setFormData] = useState<InsertContractRequestDto>({
-    ServiceProviderCompanyId: serviceProviderCompanyId,
-    ClientCompanyId: 0,
-    StartDate: '',
-    EndDate: '',
-    Status: ContractStatus.Ativo,
-    VehicleIds: [],
+    ServiceProviderCompanyId: contract?.serviceProviderCompanyId || 0,
+    ClientCompanyId: contract?.clientCompanyId || 0,
+    StartDate: contract?.startDate.split('T')[0] || '',
+    EndDate: contract?.endDate ? contract.endDate.split('T')[0] : '',
+    Status: contract?.status || ContractStatus.Ativo,
+    VehicleIds: contract?.vehicleIds || [],
   });
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [isViewOnly, setIsViewOnly] = useState(false);
-  const [selectedClient, setSelectedClient] = useState<ClientDto | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const [vehicleResponse, clientResponse] = await Promise.all([getAllVehicles(), getAllCompanies()]);
-        setVehicles(vehicleResponse);
-        setClients(clientResponse);
-      } catch (error) {
-        toast.error('Erro ao carregar veículos e clientes.');
-      } finally {
-        setLoading(false);
+      if (contract) {
+        try {
+          const vehicleResponse = await getAllVehicles();
+          setVehicles(vehicleResponse);
+          setSelectedVehicles(vehicleResponse.filter(v => contract.vehicleIds.includes(v.id)));
+        } catch (error) {
+          toast.error('Erro ao carregar veículos.');
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        toast.error('Contrato não encontrado.');
+        navigate('/contracts');
       }
     };
     fetchData();
-  }, []);
+  }, [contract, navigate]);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | React.ChangeEvent<{ name?: string; value: unknown }>) => {
     const { name, value } = event.target;
     const enumStatus = Object.keys(ContractStatus).find((key) => ContractStatus[key as keyof typeof ContractStatus] === value);
     setFormData((prevData) => ({
       ...prevData,
-      [name as string]: name === "Status" && enumStatus ? ContractStatus[enumStatus as keyof typeof ContractStatus] : value,
+      [name as string]: name === "status" && enumStatus ? ContractStatus[enumStatus as keyof typeof ContractStatus] : value,
     }));
-  };
-
-  const handleClientChange = async (event: any, newValue: ClientDto | null) => {
-    setSelectedClientId(newValue ? newValue.companiesId : null);
-    setSelectedClient(newValue);
-    if (newValue) {
-      try {
-        const contract = await getContractByCompanyName({ Name: newValue.name });
-        setExistingContract(contract);
-        setShowContractDialog(true);
-      } catch (error) {
-        setFormData((prevData) => ({
-          ...prevData,
-          ClientCompanyId: newValue.companiesId,
-        }));
-        setExistingContract(null);
-      }
-    } else {
-      setFormData((prevData) => ({
-        ...prevData,
-        ClientCompanyId: 0,
-      }));
-      setExistingContract(null);
-    }
-  };
-
-  const handleViewContract = () => {
-    setFormData({
-      ServiceProviderCompanyId: existingContract!.serviceProviderCompanyId,
-      ClientCompanyId: existingContract!.clientCompanyId,
-      StartDate: existingContract!.startDate.split('T')[0],
-      EndDate: existingContract!.endDate ? existingContract!.endDate.split('T')[0] : '',
-      Status: existingContract!.status,
-      VehicleIds: existingContract!.vehicleIds,
-    });
-    setSelectedVehicles(vehicles.filter(vehicle => existingContract!.vehicleIds.includes(vehicle.id)));
-    setIsViewOnly(true);
-    setShowContractDialog(false);
-  };
-
-  const handleClearForm = () => {
-    setFormData({
-      ServiceProviderCompanyId: serviceProviderCompanyId,
-      ClientCompanyId: 0,
-      StartDate: '',
-      EndDate: '',
-      Status: ContractStatus.Ativo,
-      VehicleIds: [],
-    });
-    setSelectedVehicles([]);
-    setSelectedClientId(null);
-    setIsViewOnly(false);
-    setExistingContract(null);
-    setSelectedClient(null);
   };
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setLoading(true);
-    const clientCompanyIdToSend = selectedClientId !== null ? selectedClientId : formData.ClientCompanyId;
-    const updatedFormData = {
-      ...formData,
-      ClientCompanyId: clientCompanyIdToSend,
-      VehicleIds: selectedVehicles.map(vehicle => vehicle.id),
-    };
     try {
-      await insertContract(updatedFormData);
-      toast.success('Contrato inserido com sucesso!');
-      handleClearForm();
+      await updateContract(formData);
+      toast.success('Contrato atualizado com sucesso!');
+      navigate('/contracts');
     } catch (error) {
-      toast.error('Erro ao inserir contrato.');
+      toast.error('Erro ao atualizar contrato.');
     } finally {
       setLoading(false);
     }
@@ -189,7 +127,7 @@ const Contracts: React.FC = () => {
       <Container maxWidth="md">
         <Box mt={10} display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h4" component="h1" gutterBottom>
-            Inserir Contrato
+            Atualizar Contrato
           </Typography>
         </Box>
         {loading ? (
@@ -203,34 +141,52 @@ const Contracts: React.FC = () => {
           <form onSubmit={handleSubmit}>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
-                <Autocomplete
-                  options={clients}
-                  getOptionLabel={(option) => option.name}
-                  value={selectedClient}
-                  onChange={handleClientChange}
-                  renderOption={(props, option) => (
-                    <Tooltip title={option.name}>
-                      <Box component="li" {...props} key={option.companiesId}>
-                        {option.name}
-                      </Box>
-                    </Tooltip>
-                  )}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Cliente"
-                      variant="outlined"
-                      disabled={isViewOnly}
-                    />
-                  )}
-                  loading={loading}
+                <TextField
+                  fullWidth
+                  label="ID"
+                  name="id"
+                  type="text"
+                  value={formData.ServiceProviderCompanyId}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  variant="outlined"
+                  disabled
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="ID da Empresa Prestadora"
+                  name="serviceProviderCompanyId"
+                  type="text"
+                  value={formData.ServiceProviderCompanyId}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  variant="outlined"
+                  disabled
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="ID da Empresa Cliente"
+                  name="clientCompanyId"
+                  type="text"
+                  value={formData.ClientCompanyId}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  variant="outlined"
+                  disabled
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="Data de Início"
-                  name="StartDate"
+                  name="startDate"
                   type="date"
                   value={formData.StartDate}
                   onChange={handleChange}
@@ -238,14 +194,13 @@ const Contracts: React.FC = () => {
                     shrink: true,
                   }}
                   variant="outlined"
-                  disabled={isViewOnly}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="Data de Término"
-                  name="EndDate"
+                  name="endDate"
                   type="date"
                   value={formData.EndDate}
                   onChange={handleChange}
@@ -253,18 +208,16 @@ const Contracts: React.FC = () => {
                     shrink: true,
                   }}
                   variant="outlined"
-                  disabled={isViewOnly}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth variant="outlined">
                   <InputLabel>Status</InputLabel>
                   <Select
-                    name="Status"
+                    name="status"
                     value={formData.Status}
                     onChange={(e) => handleChange(e as React.ChangeEvent<{ name?: string; value: unknown }>)}
                     label="Status"
-                    disabled={isViewOnly}
                   >
                     <MenuItem value={ContractStatus.Ativo}>Ativo</MenuItem>
                     <MenuItem value={ContractStatus.Inativo}>Inativo</MenuItem>
@@ -279,59 +232,35 @@ const Contracts: React.FC = () => {
                     color="primary"
                     startIcon={<AddIcon />}
                     onClick={handleOpen}
-                    disabled={isViewOnly}
                   >
                     Selecionar Veículos
                   </Button>
                 </Box>
               </Grid>
               <Grid item xs={12}>
-                <Box display="flex" justifyContent="center" gap={2}>
-                  {!isViewOnly && (
-                    <Button type="submit" variant="contained" color="primary" disabled={!isFormValid || loading}>
-                      {loading ? <CircularProgress size={24} /> : 'Inserir Contrato'}
+                {selectedVehicles.map(vehicle => (
+                  <Box key={vehicle.id} display="flex" alignItems="center" justifyContent="space-between" p={1} my={1} border={1}>
+                    <Typography>
+                      {vehicle.modelName} | {VehicleManufacturers[vehicle.manufacturer]} | {vehicle.observations} | {vehicle.licensePlate} | {vehicle.chassis} | {vehicle.manufactureYear} | {vehicle.modelYear}
+                    </Typography>
+                    <Button variant="contained" color="secondary" onClick={() => handleRemoveVehicle(vehicle.id)}>
+                      Remover
                     </Button>
-                  )}
-                  <Button type="button" variant="contained" color="secondary" onClick={handleClearForm} disabled={loading}>
-                    Limpar dados
+                  </Box>
+                ))}
+              </Grid>
+              <Grid item xs={12}>
+                <Box display="flex" justifyContent="center" gap={2}>
+                  <Button type="submit" variant="contained" color="primary" disabled={!isFormValid || loading}>
+                    {loading ? <CircularProgress size={24} /> : 'Atualizar Contrato'}
+                  </Button>
+                  <Button type="button" variant="contained" color="secondary" onClick={() => navigate('/contracts')} disabled={loading}>
+                    Cancelar
                   </Button>
                 </Box>
               </Grid>
             </Grid>
           </form>
-        )}
-        {existingContract && (
-          <Box mt={4}>
-            <Typography variant="h6">Veículos Associados ao Contrato:</Typography>
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Modelo</TableCell>
-                    <TableCell>Montadora</TableCell>
-                    <TableCell>Observações</TableCell>
-                    <TableCell>Placa</TableCell>
-                    <TableCell>Chassi</TableCell>
-                    <TableCell>Ano Fabricação</TableCell>
-                    <TableCell>Ano Modelo</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {selectedVehicles.map((vehicle) => (
-                    <TableRow key={vehicle.id}>
-                      <TableCell>{vehicle.modelName}</TableCell>
-                      <TableCell>{VehicleManufacturers[vehicle.manufacturer]}</TableCell>
-                      <TableCell>{vehicle.observations}</TableCell>
-                      <TableCell>{vehicle.licensePlate}</TableCell>
-                      <TableCell>{vehicle.chassis}</TableCell>
-                      <TableCell>{vehicle.manufactureYear}</TableCell>
-                      <TableCell>{vehicle.modelYear}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
         )}
       </Container>
       <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
@@ -379,7 +308,7 @@ const Contracts: React.FC = () => {
                     <TableCell>{vehicle.manufactureYear}</TableCell>
                     <TableCell>{vehicle.modelYear}</TableCell>
                     <TableCell>
-                      <Button variant="contained" color="primary" onClick={() => handleSelectVehicle(vehicle)} disabled={isViewOnly}>
+                      <Button variant="contained" color="primary" onClick={() => handleSelectVehicle(vehicle)}>
                         Selecionar
                       </Button>
                     </TableCell>
@@ -395,18 +324,8 @@ const Contracts: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      <Dialog open={showContractDialog} onClose={() => setShowContractDialog(false)}>
-        <DialogTitle>Contrato Existente</DialogTitle>
-        <DialogContent>
-          <Typography>O cliente já possui um contrato. Deseja visualizar ou atualizar?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => navigate('/update-contract', { state: { contract: existingContract } })}>Atualizar</Button>
-          <Button onClick={handleViewContract}>Visualizar</Button>
-        </DialogActions>
-      </Dialog>
     </Layout>
   );
 };
 
-export default Contracts;
+export default UpdateContract;

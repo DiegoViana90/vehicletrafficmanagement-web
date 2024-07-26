@@ -1,8 +1,7 @@
-// Dashboard.tsx
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import Layout from './Layout';  // Importe o Layout
+import Layout from './Layout'; 
 
 const Dashboard: React.FC = () => {
     const navigate = useNavigate();

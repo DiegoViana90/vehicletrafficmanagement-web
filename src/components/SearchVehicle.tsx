@@ -29,10 +29,13 @@ const SearchVehicle: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [openQrReader, setOpenQrReader] = useState(false);
 
+  const company = JSON.parse(localStorage.getItem('company') || '{}');
+  const companiesId = company.id;
+
   const handleSearchByLicensePlate = async () => {
     setLoading(true);
     try {
-      const response = await getVehicleByLicensePlate(licensePlate);
+      const response = await getVehicleByLicensePlate(licensePlate, companiesId);
       setVehicleData(response);
       if (!response) {
         toast.error('Veículo não encontrado.');
@@ -47,7 +50,7 @@ const SearchVehicle: React.FC = () => {
   const handleSearchByChassis = async () => {
     setLoading(true);
     try {
-      const response = await getVehicleByChassis(chassis);
+      const response = await getVehicleByChassis(chassis, companiesId);
       setVehicleData(response);
       if (!response) {
         toast.error('Veículo não encontrado.');
@@ -64,7 +67,7 @@ const SearchVehicle: React.FC = () => {
       setLoading(true);
       setOpenQrReader(false);
       try {
-        const response = await getVehicleByQRCode(data.text); // Passe apenas a string
+        const response = await getVehicleByQRCode(data.text);
         setVehicleData(response);
         if (!response) {
           toast.error('Veículo não encontrado.');

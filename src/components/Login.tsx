@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { login as loginAction } from '../actions/authActions';
 import { login, getCompanyById } from '../services/api';
-import './styles.css'; // Certifique-se que este arquivo contém os estilos atualizados.
+import './styles.css';
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState('');

@@ -187,6 +187,9 @@ export const getVehicleByChassis = async (chassis: string, companiesId: number):
 
 export const getVehicleByLicensePlate = async (licensePlate: string, companiesId: number): Promise<GetVehicleDto | null> => {
   try {
+    console.log(licensePlate)
+    console.log(companiesId)
+
     const response = await axios.post(`${API_URL}vehicle/GetVehicleByLicensePlate`, {
       LicensePlate: licensePlate,
       CompaniesId: companiesId,

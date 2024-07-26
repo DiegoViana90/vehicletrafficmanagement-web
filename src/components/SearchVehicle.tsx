@@ -22,15 +22,15 @@ import { toast } from 'react-toastify';
 import { GetVehicleDto } from '../services/api';
 import { VehicleStatus, FuelType, VehicleManufacturers } from '../constants/enum';
 
-const company = JSON.parse(localStorage.getItem('company') || '{}');
-const companiesId = company.id;
-
 const SearchVehicle: React.FC = () => {
   const [vehicleData, setVehicleData] = useState<GetVehicleDto | null>(null);
   const [licensePlate, setLicensePlate] = useState('');
   const [chassis, setChassis] = useState('');
   const [loading, setLoading] = useState(false);
   const [openQrReader, setOpenQrReader] = useState(false);
+
+  const company = JSON.parse(localStorage.getItem('company') || '{}');
+  const companiesId = company.id;
 
   const handleSearchByLicensePlate = async () => {
     setLoading(true);

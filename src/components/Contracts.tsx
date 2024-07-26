@@ -29,10 +29,13 @@ import {
 import { Add as AddIcon, Close as CloseIcon } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import Layout from './Layout';
-import { getAllVehicles, getAllCompanies, insertContract, getContractByCompanyName } from '../services/api';
+import { GetAllVehiclesFromCompany, getAllCompanies, insertContract, getContractByCompanyName } from '../services/api';
 import { GetVehicleDto, ClientDto, InsertContractRequestDto, ContractDto } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { ContractStatus, VehicleStatus, VehicleManufacturers } from '../constants/enum';
+
+const company = JSON.parse(localStorage.getItem('company') || '{}');
+const companiesId = company.id;
 
 const Contracts: React.FC = () => {
   const navigate = useNavigate();
@@ -58,10 +61,13 @@ const Contracts: React.FC = () => {
   const [isViewOnly, setIsViewOnly] = useState(false);
   const [selectedClient, setSelectedClient] = useState<ClientDto | null>(null);
 
+
+
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [vehicleResponse, clientResponse] = await Promise.all([getAllVehicles(), getAllCompanies()]);
+        const [vehicleResponse, clientResponse] = await Promise.all([GetAllVehiclesFromCompany(companiesId), getAllCompanies()]);
         setVehicles(vehicleResponse);
         setClients(clientResponse);
       } catch (error) {

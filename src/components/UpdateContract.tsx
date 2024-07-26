@@ -27,7 +27,7 @@ import {
 import { Add as AddIcon, Close as CloseIcon } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import Layout from './Layout';
-import { getAllVehicles, updateContract } from '../services/api';
+import { GetAllVehiclesFromCompany, updateContract } from '../services/api';
 import { GetVehicleDto, ContractDto, InsertContractRequestDto } from '../services/api';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ContractStatus, VehicleStatus, VehicleManufacturers } from '../constants/enum';
@@ -51,11 +51,14 @@ const UpdateContract: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
+  const company = JSON.parse(localStorage.getItem('company') || '{}');
+  const companiesId = company.id;
+
   useEffect(() => {
     const fetchData = async () => {
       if (contract) {
         try {
-          const vehicleResponse = await getAllVehicles();
+          const vehicleResponse = await GetAllVehiclesFromCompany(companiesId);
           setVehicles(vehicleResponse);
           setSelectedVehicles(vehicleResponse.filter(v => contract.vehicleIds.includes(v.id)));
         } catch (error) {

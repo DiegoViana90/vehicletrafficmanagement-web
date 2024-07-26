@@ -72,6 +72,7 @@ export interface InsertVehicleRequestDto {
   ContractId?: number;
   ModelYear: string;
   ManufactureYear: string;
+  CompaniesId: number;
 }
 
 export interface VehicleModelDtoResponse {
@@ -171,10 +172,11 @@ export const insertVehicle = async (vehicleData: InsertVehicleRequestDto) => {
   return response.data;
 };
 
-export const getVehicleByChassis = async (chassis: string): Promise<GetVehicleDto | null> => {
+export const getVehicleByChassis = async (chassis: string, companiesId: number): Promise<GetVehicleDto | null> => {
   try {
     const response = await axios.post(`${API_URL}vehicle/GetVehicleByChassis`, {
       Chassis: chassis,
+      CompaniesId: companiesId,
     });
     return response.data;
   } catch (error) {
@@ -183,10 +185,11 @@ export const getVehicleByChassis = async (chassis: string): Promise<GetVehicleDt
   }
 };
 
-export const getVehicleByLicensePlate = async (licensePlate: string): Promise<GetVehicleDto | null> => {
+export const getVehicleByLicensePlate = async (licensePlate: string, companiesId: number): Promise<GetVehicleDto | null> => {
   try {
     const response = await axios.post(`${API_URL}vehicle/GetVehicleByLicensePlate`, {
       LicensePlate: licensePlate,
+      CompaniesId: companiesId,
     });
     return response.data;
   } catch (error) {
@@ -212,10 +215,15 @@ export const getAllContracts = async (): Promise<ContractDto[]> => {
   return response.data;
 };
 
-export const getAllVehicles = async (): Promise<GetVehicleDto[]> => {
-    const response = await axios.get(`${API_URL}vehicle/GetAllVehicles`);
-    return response.data;
+export const GetAllVehiclesFromCompany = async (companiesId: number): Promise<GetVehicleDto[]> => {
+  const response = await axios.get(`${API_URL}vehicle/GetAllVehiclesFromCompany`, {
+    params: {
+      CompaniesId: companiesId
+    }
+  });
+  return response.data;
 };
+
 
 export const getAllCompanies = async (): Promise<ClientDto[]> => {
   const response = await axios.get(`${API_URL}company/GetAllCompanies`);

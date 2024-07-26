@@ -22,6 +22,9 @@ import { toast } from 'react-toastify';
 import { GetVehicleDto } from '../services/api';
 import { VehicleStatus, FuelType, VehicleManufacturers } from '../constants/enum';
 
+const company = JSON.parse(localStorage.getItem('company') || '{}');
+const companiesId = company.id;
+
 const SearchVehicle: React.FC = () => {
   const [vehicleData, setVehicleData] = useState<GetVehicleDto | null>(null);
   const [licensePlate, setLicensePlate] = useState('');
@@ -32,7 +35,7 @@ const SearchVehicle: React.FC = () => {
   const handleSearchByLicensePlate = async () => {
     setLoading(true);
     try {
-      const response = await getVehicleByLicensePlate(licensePlate);
+      const response = await getVehicleByLicensePlate(licensePlate, companiesId);
       setVehicleData(response);
       if (!response) {
         toast.error('Veículo não encontrado.');
@@ -47,7 +50,7 @@ const SearchVehicle: React.FC = () => {
   const handleSearchByChassis = async () => {
     setLoading(true);
     try {
-      const response = await getVehicleByChassis(chassis);
+      const response = await getVehicleByChassis(chassis, companiesId);
       setVehicleData(response);
       if (!response) {
         toast.error('Veículo não encontrado.');
@@ -64,7 +67,7 @@ const SearchVehicle: React.FC = () => {
       setLoading(true);
       setOpenQrReader(false);
       try {
-        const response = await getVehicleByQRCode(data.text); // Passe apenas a string
+        const response = await getVehicleByQRCode(data.text);
         setVehicleData(response);
         if (!response) {
           toast.error('Veículo não encontrado.');

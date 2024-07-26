@@ -28,6 +28,9 @@ import { toast } from 'react-toastify';
 import { VehicleModelDtoResponse, InsertVehicleRequestDto, GetVehicleDto } from '../services/api';
 import { VehicleStatus, FuelType, VehicleManufacturers } from '../constants/enum';
 
+const company = JSON.parse(localStorage.getItem('company') || '{}');
+const companiesId = company.id;
+
 const Vehicles: React.FC = () => {
   const navigate = useNavigate();
   const [vehicleModels, setVehicleModels] = useState<VehicleModelDtoResponse[]>([]);
@@ -43,6 +46,7 @@ const Vehicles: React.FC = () => {
     ContractId: undefined,
     ManufactureYear: '',
     ModelYear: '',
+    CompaniesId: companiesId,
   });
 
   const [isFormValid, setIsFormValid] = useState(false);
@@ -66,7 +70,7 @@ const Vehicles: React.FC = () => {
     const fetchVehicleByLicensePlate = async () => {
       if (vehicleData.LicensePlate && vehicleData.LicensePlate.replace(/[^A-Z0-9]/g, '').length === 7) {
         try {
-          const response: GetVehicleDto | null = await getVehicleByLicensePlate(vehicleData.LicensePlate);
+          const response: GetVehicleDto | null = await getVehicleByLicensePlate(vehicleData.LicensePlate, companiesId);
           if (response) {
             setVehicleData((prevData) => ({
               ...prevData,
@@ -103,7 +107,7 @@ const Vehicles: React.FC = () => {
     const fetchVehicle = async () => {
       if (vehicleData.Chassis.length === 17 && !hasFetchedVehicle) {
         try {
-          const response: GetVehicleDto | null = await getVehicleByChassis(vehicleData.Chassis);
+          const response: GetVehicleDto | null = await getVehicleByChassis(vehicleData.Chassis, companiesId);
           if (response) {
             setVehicleData((prevData) => ({
               ...prevData,
@@ -275,7 +279,8 @@ const Vehicles: React.FC = () => {
       Status: VehicleStatus['Selecione uma Opção'],
       ContractId: undefined,
       ManufactureYear: '',
-      ModelYear: ''
+      ModelYear: '',
+      CompaniesId: companiesId,
     });
     setFieldsDisabled(false);
     setHasFetchedVehicle(false); // Reset the flag to allow fetching

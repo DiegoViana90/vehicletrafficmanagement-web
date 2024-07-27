@@ -12,6 +12,16 @@ export interface InsertContractRequestDto {
   VehicleIds: number[];
 }
 
+export interface UpdateContractRequestDto {
+  Id: number;
+  ServiceProviderCompanyId: number;
+  ClientCompanyId: number;
+  StartDate: string;
+  EndDate?: string;
+  Status: ContractStatus;
+  VehicleIds: number[];
+}
+
 export interface ContractDto {
   id: number;
   serviceProviderCompanyId: number;
@@ -42,6 +52,7 @@ interface UpdatePasswordRequest {
 
 interface GetCompanyByTaxNumberRequest {
   TaxNumber: string;
+  CompanyRelated: number;
 }
 
 export interface GetVehicleDto {
@@ -91,10 +102,15 @@ export interface ClientDto {
   id: number;
   companiesId: number;
   name: string;
+  taxNumber: string; 
 }
 
 export const login = async (email: string, password: string): Promise<AuthResponse> => {
-  const response = await axios.post(`${API_URL}auth/Login`, { email, password });
+  const response = await axios.post(`${API_URL}auth/Login`, { email, password }, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
   return response.data;
 };
 
@@ -103,6 +119,7 @@ export const getCompanyById = async (id: number, token: string): Promise<any> =>
     const response = await axios.get(`${API_URL}company/GetCompanyById?id=${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
       },
     });
 
@@ -117,10 +134,15 @@ export const getCompanyById = async (id: number, token: string): Promise<any> =>
   }
 };
 
-export const getCompanyByTaxNumber = async (taxNumber: string): Promise<any> => {
+export const GetCompanyByTaxNumberAndCompanyRelated = async (taxNumber: string, companyRelated: number): Promise<any> => {
   try {
-    const response = await axios.post(`${API_URL}company/GetCompanyByTaxNumber`, {
+    const response = await axios.post(`${API_URL}company/GetCompanyByTaxNumberAndCompanyRelated`, {
       TaxNumber: taxNumber,
+      CompanyRelated: companyRelated
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
 
     if (response.status !== 200) {
@@ -129,14 +151,18 @@ export const getCompanyByTaxNumber = async (taxNumber: string): Promise<any> => 
 
     return response.data;
   } catch (error) {
-    console.error('Erro ao chamar a API getCompanyByTaxNumber:', error);
+    console.error('Erro ao chamar a API GetCompanyByTaxNumberAndCompanyRelated:', error);
     throw error;
   }
 };
 
 export const changePassword = async (data: UpdatePasswordRequest): Promise<any> => {
   try {
-    const response = await axios.put(`${API_URL}auth/UpdateFirstPassword`, data);
+    const response = await axios.put(`${API_URL}auth/UpdateFirstPassword`, data, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
     return response.data;
   } catch (error: any) {
     if (axios.isAxiosError(error) && error.response) {
@@ -148,27 +174,47 @@ export const changePassword = async (data: UpdatePasswordRequest): Promise<any> 
 };
 
 export const insertCompany = async (companyData: any) => {
-  const response = await axios.post(`${API_URL}company/InsertCompany`, companyData);
+  const response = await axios.post(`${API_URL}company/InsertCompany`, companyData, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
   return response.data;
 };
 
-export const updateCompany = async (updateCompanyData: any) => {
-  const response = await axios.put(`${API_URL}company/UpdateCompanByTaxNumber`, updateCompanyData);
+export const updateCompanyByTaxNumberAndCompanyRelated = async (updateCompanyData: any) => {
+  const response = await axios.put(`${API_URL}company/UpdateCompanyByTaxNumberAndCompanyRelated`, updateCompanyData, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
   return response.data;
 };
 
 export const getAllVehicleModels = async (): Promise<VehicleModelDtoResponse[]> => {
-  const response = await axios.post(`${API_URL}vehicle/GetAllVehicleModel`);
+  const response = await axios.post(`${API_URL}vehicle/GetAllVehicleModel`, null, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
   return response.data;
 };
 
 export const insertVehicleModel = async (modelData: any) => {
-  const response = await axios.post(`${API_URL}vehicle/InsertVehicleModel`, modelData);
+  const response = await axios.post(`${API_URL}vehicle/InsertVehicleModel`, modelData, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
   return response.data;
 };
 
 export const insertVehicle = async (vehicleData: InsertVehicleRequestDto) => {
-  const response = await axios.post(`${API_URL}vehicle/InsertVehicle`, vehicleData);
+  const response = await axios.post(`${API_URL}vehicle/InsertVehicle`, vehicleData, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
   return response.data;
 };
 
@@ -177,6 +223,10 @@ export const getVehicleByChassis = async (chassis: string, companiesId: number):
     const response = await axios.post(`${API_URL}vehicle/GetVehicleByChassis`, {
       Chassis: chassis,
       CompaniesId: companiesId,
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
     return response.data;
   } catch (error) {
@@ -193,6 +243,10 @@ export const getVehicleByLicensePlate = async (licensePlate: string, companiesId
     const response = await axios.post(`${API_URL}vehicle/GetVehicleByLicensePlate`, {
       LicensePlate: licensePlate,
       CompaniesId: companiesId,
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
     return response.data;
   } catch (error) {
@@ -205,6 +259,10 @@ export const getVehicleByQRCode = async (qrCode: string): Promise<GetVehicleDto 
   try {
     const response = await axios.post(`${API_URL}vehicle/GetVehicleByQRCode`, {
       QRCode: qrCode,
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
     return response.data;
   } catch (error) {
@@ -214,34 +272,58 @@ export const getVehicleByQRCode = async (qrCode: string): Promise<GetVehicleDto 
 };
 
 export const getAllContracts = async (): Promise<ContractDto[]> => {
-  const response = await axios.get(`${API_URL}contract/GetAllContracts`);
-  return response.data;
-};
-
-export const GetAllVehiclesFromCompany = async (companiesId: number): Promise<GetVehicleDto[]> => {
-  const response = await axios.get(`${API_URL}vehicle/GetAllVehiclesFromCompany`, {
-    params: {
-      CompaniesId: companiesId
+  const response = await axios.get(`${API_URL}contract/GetAllContracts`, {
+    headers: {
+      'Content-Type': 'application/json'
     }
   });
   return response.data;
 };
 
+export const getAllVehiclesFromCompany = async (data: { CompaniesId: number }): Promise<GetVehicleDto[]> => {
+  const response = await axios.post(`${API_URL}vehicle/GetAllVehiclesFromCompany`, data, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.data;
+};
 
-export const getAllCompanies = async (): Promise<ClientDto[]> => {
-  const response = await axios.get(`${API_URL}company/GetAllCompanies`);
+export const getAllCompaniesByCompany = async (data: { CompanyRelated: number }): Promise<ClientDto[]> => {
+  const response = await axios.post(`${API_URL}company/GetAllCompaniesByCompany`, data, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
   return response.data;
 };
 
 export const insertContract = async (contractData: InsertContractRequestDto): Promise<void> => {
-  await axios.post(`${API_URL}contract/InsertContract`, contractData);
+  await axios.post(`${API_URL}contract/InsertContract`, contractData, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
 };
 
 export const getContractByCompanyName = async (data: { Name: string }): Promise<ContractDto> => {
-  const response = await axios.post(`${API_URL}contract/GetContractByCompanyName`, data);
+  const response = await axios.post(`${API_URL}contract/GetContractByCompanyName`, data, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
   return response.data;
 };
 
-export const updateContract = async (contractData: InsertContractRequestDto): Promise<void> => {
-  await axios.put(`${API_URL}contract/UpdateContract`, contractData);
+export const updateContract = async (contractData: UpdateContractRequestDto): Promise<void> => {
+  await axios.put(`${API_URL}contract/UpdateContract`, contractData, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
 };
+
+export async function getContractByCompanyId(id: number): Promise<ContractDto> {
+  const response = await axios.get<ContractDto>(`/api/contracts/company/${id}`);
+  return response.data;
+}

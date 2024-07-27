@@ -7,6 +7,10 @@ import {
   Typography,
   CircularProgress,
   Grid,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
   Dialog,
   DialogActions,
   DialogContent,
@@ -19,16 +23,12 @@ import {
   TableHead,
   TableRow,
   Paper,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
 } from '@mui/material';
 import { Add as AddIcon, Close as CloseIcon } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import Layout from './Layout';
-import { GetAllVehiclesFromCompany, updateContract } from '../services/api';
-import { GetVehicleDto, ContractDto, InsertContractRequestDto } from '../services/api';
+import { getAllVehiclesFromCompany, getContractByCompanyName, updateContract } from '../services/api';
+import { GetVehicleDto, ContractDto, UpdateContractRequestDto } from '../services/api';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ContractStatus, VehicleStatus, VehicleManufacturers } from '../constants/enum';
 
@@ -40,7 +40,8 @@ const UpdateContract: React.FC = () => {
   const [vehicles, setVehicles] = useState<GetVehicleDto[]>([]);
   const [selectedVehicles, setSelectedVehicles] = useState<GetVehicleDto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [formData, setFormData] = useState<InsertContractRequestDto>({
+  const [formData, setFormData] = useState<UpdateContractRequestDto>({
+    Id: contract?.id || 0,
     ServiceProviderCompanyId: contract?.serviceProviderCompanyId || 0,
     ClientCompanyId: contract?.clientCompanyId || 0,
     StartDate: contract?.startDate.split('T')[0] || '',
@@ -58,7 +59,7 @@ const UpdateContract: React.FC = () => {
     const fetchData = async () => {
       if (contract) {
         try {
-          const vehicleResponse = await GetAllVehiclesFromCompany(companiesId);
+          const vehicleResponse = await getAllVehiclesFromCompany(companiesId);
           setVehicles(vehicleResponse);
           setSelectedVehicles(vehicleResponse.filter(v => contract.vehicleIds.includes(v.id)));
         } catch (error) {
@@ -89,11 +90,31 @@ const UpdateContract: React.FC = () => {
     try {
       await updateContract(formData);
       toast.success('Contrato atualizado com sucesso!');
-      navigate('/contracts');
+      await fetchUpdatedContract();
     } catch (error) {
       toast.error('Erro ao atualizar contrato.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUpdatedContract = async () => {
+    try {
+      const updatedContract = await getContractByCompanyName({ Name: company.tradeName });
+      setFormData({
+        Id: updatedContract.id,
+        ServiceProviderCompanyId: updatedContract.serviceProviderCompanyId,
+        ClientCompanyId: updatedContract.clientCompanyId,
+        StartDate: updatedContract.startDate.split('T')[0],
+        EndDate: updatedContract.endDate ? updatedContract.endDate.split('T')[0] : '',
+        Status: updatedContract.status,
+        VehicleIds: updatedContract.vehicleIds,
+      });
+      const vehicleResponse = await getAllVehiclesFromCompany(companiesId);
+      setVehicles(vehicleResponse);
+      setSelectedVehicles(vehicleResponse.filter(v => updatedContract.vehicleIds.includes(v.id)));
+    } catch (error) {
+      toast.error('Erro ao buscar contrato atualizado.');
     }
   };
 
@@ -149,7 +170,7 @@ const UpdateContract: React.FC = () => {
                   label="ID"
                   name="id"
                   type="text"
-                  value={formData.ServiceProviderCompanyId}
+                  value={formData.Id}
                   InputLabelProps={{
                     shrink: true,
                   }}

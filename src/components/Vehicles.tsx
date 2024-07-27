@@ -272,6 +272,9 @@ const Vehicles: React.FC = () => {
   };
 
   const clearForm = () => {
+    const company = JSON.parse(localStorage.getItem('company') || '{}');
+    const companiesId = company.id;
+
     setVehicleData({
       VehicleModelId: 0,
       LicensePlate: '',
@@ -283,11 +286,11 @@ const Vehicles: React.FC = () => {
       ContractId: undefined,
       ManufactureYear: '',
       ModelYear: '',
-      CompaniesId: 0,
+      CompaniesId: companiesId,
     });
     setFieldsDisabled(false);
-    setHasFetchedVehicle(false); // Reset the flag to allow fetching
-    setSelectedVehicleModel(''); // Clear the selected vehicle model display
+    setHasFetchedVehicle(false);
+    setSelectedVehicleModel('');
   };
 
   const handleOpen = () => {

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Container, TextField, Button, Box, Typography, CircularProgress, Grid } from '@mui/material';
 import Layout from './Layout';
 import { formatCEPNumber, formatCNPJandCPF, formatPhoneNumber } from '../mask/mask';
-import { getCompanyByTaxNumber, insertCompany } from '../services/api';
+import { GetCompanyByTaxNumberAndCompanyRelated, insertCompany } from '../services/api';
 import { useDispatch } from 'react-redux';
 import { setExistingCompanyData } from '../reducers/companySlice';
 import { toast } from 'react-toastify';
@@ -88,8 +88,11 @@ const Companies: React.FC = () => {
     setShowLoadingScreen(true);
 
     try {
+      const company = JSON.parse(localStorage.getItem('company') || '{}');
+      const companyRelated = company.id;
+      console.log(companyRelated)
       const startTime = Date.now();
-      const response = await getCompanyByTaxNumber(taxNumber.replace(/\D/g, ''));
+      const response = await GetCompanyByTaxNumberAndCompanyRelated(taxNumber.replace(/\D/g, ''), companyRelated );
       const elapsedTime = Date.now() - startTime;
       const remainingTime = 800 - elapsedTime;
 
@@ -120,8 +123,12 @@ const Companies: React.FC = () => {
       return;
     }
     setLoading(true);
+
     try {
-      await insertCompany(companyData);
+      const company = JSON.parse(localStorage.getItem('company') || '{}');
+      const companyRelated = company.id;
+      
+      await insertCompany({ ...companyData, companyRelated });
       toast.success('Empresa registrada com sucesso!');
       setCompanyData({
         name: '',

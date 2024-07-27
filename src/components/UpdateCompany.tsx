@@ -4,8 +4,11 @@ import Layout from './Layout';
 import { formatCEPNumber, formatCNPJandCPF, formatPhoneNumber } from '../mask/mask';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
-import { updateCompany } from '../services/api';
+import { updateCompanyByTaxNumberAndCompanyRelated } from '../services/api';
 import { toast } from 'react-toastify';
+
+const company = JSON.parse(localStorage.getItem('company') || '{}');
+const companyRelated = company.id;
 
 interface CompanyData {
   name: string;
@@ -22,6 +25,7 @@ interface CompanyData {
   phoneNumber: string;
   email: string;
   observations: string;
+  companyRelated: number;
 }
 
 const UpdateCompany: React.FC = () => {
@@ -44,6 +48,7 @@ const UpdateCompany: React.FC = () => {
         phoneNumber: '',
         email: '',
         observations: '',
+        companyRelated: 0
       };
     }
     return {
@@ -101,7 +106,7 @@ const UpdateCompany: React.FC = () => {
     }
     setLoading(true);
     try {
-      await updateCompany(companyData);
+      await updateCompanyByTaxNumberAndCompanyRelated(companyData);
       toast.success('Empresa atualizada com sucesso!');
     } catch (error) {
       toast.error('Erro ao atualizar a empresa.');

@@ -59,7 +59,7 @@ const UpdateContract: React.FC = () => {
     const fetchData = async () => {
       if (contract) {
         try {
-          const vehicleResponse = await getAllVehiclesFromCompany(companiesId);
+          const vehicleResponse = await getAllVehiclesFromCompany({ CompaniesId: companiesId });
           setVehicles(vehicleResponse);
           setSelectedVehicles(vehicleResponse.filter(v => contract.vehicleIds.includes(v.id)));
         } catch (error) {
@@ -100,7 +100,7 @@ const UpdateContract: React.FC = () => {
 
   const fetchUpdatedContract = async () => {
     try {
-      const updatedContract = await getContractByCompanyName({ Name: company.tradeName });
+      const updatedContract = await getContractByCompanyName({ Name: company.tradeName, CompaniesId: companiesId });
       setFormData({
         Id: updatedContract.id,
         ServiceProviderCompanyId: updatedContract.serviceProviderCompanyId,
@@ -110,7 +110,7 @@ const UpdateContract: React.FC = () => {
         Status: updatedContract.status,
         VehicleIds: updatedContract.vehicleIds,
       });
-      const vehicleResponse = await getAllVehiclesFromCompany(companiesId);
+      const vehicleResponse = await getAllVehiclesFromCompany({ CompaniesId: companiesId });
       setVehicles(vehicleResponse);
       setSelectedVehicles(vehicleResponse.filter(v => updatedContract.vehicleIds.includes(v.id)));
     } catch (error) {

@@ -67,7 +67,7 @@ const SearchVehicle: React.FC = () => {
       setLoading(true);
       setOpenQrReader(false);
       try {
-        const response = await getVehicleByQRCode(data.text);
+        const response = await getVehicleByQRCode(data.text, companiesId);
         setVehicleData(response);
         if (!response) {
           toast.error('Veículo não encontrado.');

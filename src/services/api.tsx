@@ -255,10 +255,11 @@ export const getVehicleByLicensePlate = async (licensePlate: string, companiesId
   }
 };
 
-export const getVehicleByQRCode = async (qrCode: string): Promise<GetVehicleDto | null> => {
+export const getVehicleByQRCode = async (qrCode: string, companiesId: number): Promise<GetVehicleDto | null> => {
   try {
     const response = await axios.post(`${API_URL}vehicle/GetVehicleByQRCode`, {
       QRCode: qrCode,
+      CompaniesId: companiesId
     }, {
       headers: {
         'Content-Type': 'application/json'
@@ -306,7 +307,7 @@ export const insertContract = async (contractData: InsertContractRequestDto): Pr
   });
 };
 
-export const getContractByCompanyName = async (data: { Name: string }): Promise<ContractDto> => {
+export const getContractByCompanyName = async (data: { Name: string, CompaniesId: number }): Promise<ContractDto> => {
   const response = await axios.post(`${API_URL}contract/GetContractByCompanyName`, data, {
     headers: {
       'Content-Type': 'application/json'

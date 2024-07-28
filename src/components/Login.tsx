@@ -13,9 +13,7 @@ const Login: React.FC = () => {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('company');
+        localStorage.clear();
     }, []);
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -40,6 +38,7 @@ const Login: React.FC = () => {
                 localStorage.setItem('company', JSON.stringify(companyResponse));
                 alert(`Seja bem-vindo, ${fullName}, da empresa ${companyResponse.tradeName}!`);
             } else {
+                localStorage.removeItem('company');
                 alert(`Seja bem-vindo, ${fullName}!`);
             }
 

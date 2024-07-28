@@ -60,19 +60,20 @@ const Contracts: React.FC = () => {
   const [selectedClient, setSelectedClient] = useState<ClientDto | null>(null);
   const [selectedTaxNumber, setSelectedTaxNumber] = useState<string>('');
 
+  const fetchData = async () => {
+    try {
+      const vehicleResponse = await getAllVehiclesFromCompany({ CompaniesId: serviceProviderCompanyId });
+      const clientResponse = await getAllCompaniesByCompany({ CompanyRelated: companyRelated });
+      setVehicles(vehicleResponse);
+      setClients(clientResponse);
+    } catch (error) {
+      toast.error('Erro ao carregar veículos e clientes.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const vehicleResponse = await getAllVehiclesFromCompany({ CompaniesId: serviceProviderCompanyId });
-        const clientResponse = await getAllCompaniesByCompany({ CompanyRelated: companyRelated });
-        setVehicles(vehicleResponse);
-        setClients(clientResponse);
-      } catch (error) {
-        toast.error('Erro ao carregar veículos e clientes.');
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
   }, [serviceProviderCompanyId, companyRelated]);
 
@@ -90,7 +91,7 @@ const Contracts: React.FC = () => {
     setSelectedTaxNumber(newValue ? newValue.taxNumber : '');
     if (newValue) {
       try {
-        const contract = await getContractByCompanyName({ Name: newValue.name });
+        const contract = await getContractByCompanyName({ Name: newValue.name, CompaniesId: serviceProviderCompanyId });
         setExistingContract(contract);
         setShowContractDialog(true);
       } catch (error) {
@@ -175,6 +176,7 @@ const Contracts: React.FC = () => {
         await insertContract(updatedFormData);
         toast.success('Contrato inserido com sucesso!');
       }
+      await fetchData(); // Recarrega os dados após inserção ou atualização
       handleClearForm();
     } catch (error) {
       toast.error('Erro ao salvar contrato.');
@@ -324,6 +326,47 @@ const Contracts: React.FC = () => {
                   </Button>
                 </Box>
               </Grid>
+              {!existingContract && selectedVehicles.length > 0 && (
+                <Grid item xs={12}>
+                  <Box mt={4}>
+                    <Typography variant="h6">Veículos Selecionados:</Typography>
+                    <TableContainer component={Paper}>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Modelo</TableCell>
+                            <TableCell>Montadora</TableCell>
+                            <TableCell>Observações</TableCell>
+                            <TableCell>Placa</TableCell>
+                            <TableCell>Chassi</TableCell>
+                            <TableCell>Ano Fabricação</TableCell>
+                            <TableCell>Ano Modelo</TableCell>
+                            <TableCell>Ação</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {selectedVehicles.map((vehicle) => (
+                            <TableRow key={vehicle.id}>
+                              <TableCell>{vehicle.modelName}</TableCell>
+                              <TableCell>{VehicleManufacturers[vehicle.manufacturer]}</TableCell>
+                              <TableCell>{vehicle.observations}</TableCell>
+                              <TableCell>{vehicle.licensePlate}</TableCell>
+                              <TableCell>{vehicle.chassis}</TableCell>
+                              <TableCell>{vehicle.manufactureYear}</TableCell>
+                              <TableCell>{vehicle.modelYear}</TableCell>
+                              <TableCell>
+                                <Button variant="contained" color="secondary" onClick={() => handleRemoveVehicle(vehicle.id)} disabled={isViewOnly}>
+                                  Remover
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Box>
+                </Grid>
+              )}
               <Grid item xs={12}>
                 <Box display="flex" justifyContent="center" gap={2}>
                   {!isViewOnly && (

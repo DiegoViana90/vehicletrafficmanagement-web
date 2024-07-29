@@ -28,6 +28,7 @@ const SearchVehicle: React.FC = () => {
   const [chassis, setChassis] = useState('');
   const [loading, setLoading] = useState(false);
   const [openQrReader, setOpenQrReader] = useState(false);
+  const [hasFetchedVehicle, setHasFetchedVehicle] = useState(false);
 
   const company = JSON.parse(localStorage.getItem('company') || '{}');
   const companiesId = company.id;
@@ -37,7 +38,10 @@ const SearchVehicle: React.FC = () => {
     try {
       const response = await getVehicleByLicensePlate(licensePlate, companiesId);
       setVehicleData(response);
-      if (!response) {
+      if (response) {
+        setHasFetchedVehicle(true);
+        toast.success('Veículo encontrado!');
+      } else {
         toast.error('Veículo não encontrado.');
       }
     } catch (error) {
@@ -52,7 +56,10 @@ const SearchVehicle: React.FC = () => {
     try {
       const response = await getVehicleByChassis(chassis, companiesId);
       setVehicleData(response);
-      if (!response) {
+      if (response) {
+        setHasFetchedVehicle(true);
+        toast.success('Veículo encontrado!');
+      } else {
         toast.error('Veículo não encontrado.');
       }
     } catch (error) {
@@ -69,7 +76,10 @@ const SearchVehicle: React.FC = () => {
       try {
         const response = await getVehicleByQRCode(data.text, companiesId);
         setVehicleData(response);
-        if (!response) {
+        if (response) {
+          setHasFetchedVehicle(true);
+          toast.success('Veículo encontrado!');
+        } else {
           toast.error('Veículo não encontrado.');
         }
       } catch (error) {
@@ -93,6 +103,15 @@ const SearchVehicle: React.FC = () => {
     } else if (name === 'chassis') {
       setChassis(value.toUpperCase().slice(0, 17));
     }
+    setHasFetchedVehicle(false);
+    setVehicleData(null);
+  };
+
+  const clearData = () => {
+    setLicensePlate('');
+    setChassis('');
+    setVehicleData(null);
+    setHasFetchedVehicle(false);
   };
 
   return (
@@ -156,6 +175,16 @@ const SearchVehicle: React.FC = () => {
                 disabled={loading}
               >
                 Ler QR Code
+              </Button>
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={clearData}
+                disabled={loading}
+              >
+                Limpar Dados
               </Button>
             </Grid>
           </Grid>

@@ -2,13 +2,11 @@ export const formatCNPJandCPF = (value: string) => {
   let cleaned = value.replace(/[^0-9]/g, '');
 
   if (cleaned.length <= 11) {
-      // Format as CPF
       cleaned = cleaned.slice(0, 11);
       return cleaned.replace(/(\d{3})(\d)/, "$1.$2")
                     .replace(/(\d{3})(\d)/, "$1.$2")
                     .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
   } else {
-      // Format as CNPJ
       cleaned = cleaned.slice(0, 14);
       return cleaned.replace(/(\d{2})(\d)/, "$1.$2")
                     .replace(/(\d{3})(\d)/, "$1.$2")

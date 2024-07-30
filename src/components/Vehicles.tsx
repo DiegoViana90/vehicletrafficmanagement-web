@@ -44,6 +44,7 @@ const Vehicles: React.FC = () => {
     ManufactureYear: '',
     ModelYear: '',
     CompaniesId: 0,
+    renavam: '',
   });
 
   const [isFormValid, setIsFormValid] = useState(false);
@@ -87,7 +88,7 @@ const Vehicles: React.FC = () => {
               ContractId: response.contractId,
               ManufactureYear: response.manufactureYear,
               ModelYear: response.modelYear,
-              Observation: response.observations
+              renavam: response.renavam,
             }));
             setSelectedVehicleModel(`${response.modelName} | ${VehicleManufacturers[response.manufacturer]} | ${response.observations}`);
             setHasFetchedVehicle(true);
@@ -124,7 +125,7 @@ const Vehicles: React.FC = () => {
               ContractId: response.contractId,
               ManufactureYear: response.manufactureYear,
               ModelYear: response.modelYear,
-              Observation: response.observations
+              renavam: response.renavam,
             }));
             setSelectedVehicleModel(`${response.modelName} | ${VehicleManufacturers[response.manufacturer]} | ${response.observations}`);
             setHasFetchedVehicle(true);
@@ -238,6 +239,7 @@ const Vehicles: React.FC = () => {
     const isModelValid = vehicleData.VehicleModelId !== 0;
     const isManufactureYearValid = vehicleData.ManufactureYear?.trim() !== '';
     const isModelYearValid = vehicleData.ModelYear?.trim() !== '';
+    const isRenavamValid = vehicleData.renavam?.trim() !== '';
 
     setIsFormValid(
       isLicensePlateValid &&
@@ -249,7 +251,8 @@ const Vehicles: React.FC = () => {
       isContractIdValid &&
       isModelValid &&
       isManufactureYearValid &&
-      isModelYearValid
+      isModelYearValid &&
+      isRenavamValid
     );
   };
 
@@ -287,6 +290,7 @@ const Vehicles: React.FC = () => {
       ManufactureYear: '',
       ModelYear: '',
       CompaniesId: companiesId,
+      renavam: '',
     });
     setFieldsDisabled(false);
     setHasFetchedVehicle(false);
@@ -366,7 +370,7 @@ const Vehicles: React.FC = () => {
         )}
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 fullWidth
                 label="Placa"
@@ -377,13 +381,24 @@ const Vehicles: React.FC = () => {
                 disabled={fieldsDisabled}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 fullWidth
                 label="Chassi"
                 name="Chassis"
                 value={vehicleData.Chassis}
                 onChange={handleChassisChange}
+                variant="outlined"
+                disabled={fieldsDisabled}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="RENAVAM"
+                name="renavam"
+                value={vehicleData.renavam}
+                onChange={handleChange}
                 variant="outlined"
                 disabled={fieldsDisabled}
               />

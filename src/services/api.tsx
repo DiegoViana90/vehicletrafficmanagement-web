@@ -70,6 +70,7 @@ export interface GetVehicleDto {
   modelName: string;
   manufacturer: VehicleManufacturers;
   observations: string;
+  renavam: string;
 }
 
 export interface InsertVehicleRequestDto {
@@ -84,6 +85,7 @@ export interface InsertVehicleRequestDto {
   ModelYear: string;
   ManufactureYear: string;
   CompaniesId: number;
+  renavam: string;
 }
 
 export interface VehicleModelDtoResponse {

@@ -11,11 +11,11 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Tooltip,
   IconButton,
 } from '@mui/material';
 import QrReader from 'react-qr-scanner';
 import { Add as AddIcon, Close as CloseIcon } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import Layout from './Layout';
 import { getVehicleByChassis, getVehicleByLicensePlate, getVehicleByQRCode } from '../services/api';
 import { toast } from 'react-toastify';
@@ -32,6 +32,7 @@ const SearchVehicle: React.FC = () => {
 
   const company = JSON.parse(localStorage.getItem('company') || '{}');
   const companiesId = company.id;
+  const navigate = useNavigate();
 
   const handleSearchByLicensePlate = async () => {
     setLoading(true);
@@ -114,6 +115,13 @@ const SearchVehicle: React.FC = () => {
     setHasFetchedVehicle(false);
   };
 
+  const isLicensePlateValid = licensePlate.replace('-', '').length === 7;
+  const isChassisValid = chassis.length === 17;
+
+  const handleViewHistory = () => {
+    navigate('/vehicle-historic', { state: { vehicleId: vehicleData?.id } });
+  };
+
   return (
     <Layout>
       <Container maxWidth="md">
@@ -121,73 +129,75 @@ const SearchVehicle: React.FC = () => {
           <Typography variant="h4" component="h1" gutterBottom>
             Buscar Veículo
           </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Placa"
-                name="licensePlate"
-                value={licensePlate}
-                onChange={handleInputChange}
-                variant="outlined"
-                disabled={loading}
-              />
+          {!hasFetchedVehicle && (
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Placa"
+                  name="licensePlate"
+                  value={licensePlate}
+                  onChange={handleInputChange}
+                  variant="outlined"
+                  disabled={loading}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  onClick={handleSearchByLicensePlate}
+                  disabled={loading || !isLicensePlateValid}
+                >
+                  Buscar por Placa
+                </Button>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Chassi"
+                  name="chassis"
+                  value={chassis}
+                  onChange={handleInputChange}
+                  variant="outlined"
+                  disabled={loading}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  onClick={handleSearchByChassis}
+                  disabled={loading || !isChassisValid}
+                >
+                  Buscar por Chassi
+                </Button>
+              </Grid>
+              <Grid item xs={12}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => setOpenQrReader(true)}
+                  disabled={loading}
+                >
+                  Ler QR Code
+                </Button>
+              </Grid>
+              <Grid item xs={12}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  onClick={clearData}
+                  disabled={loading}
+                >
+                  Limpar Dados
+                </Button>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Button
-                fullWidth
-                variant="contained"
-                color="primary"
-                onClick={handleSearchByLicensePlate}
-                disabled={loading}
-              >
-                Buscar por Placa
-              </Button>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Chassi"
-                name="chassis"
-                value={chassis}
-                onChange={handleInputChange}
-                variant="outlined"
-                disabled={loading}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Button
-                fullWidth
-                variant="contained"
-                color="primary"
-                onClick={handleSearchByChassis}
-                disabled={loading}
-              >
-                Buscar por Chassi
-              </Button>
-            </Grid>
-            <Grid item xs={12}>
-              <Button
-                fullWidth
-                variant="contained"
-                color="secondary"
-                onClick={() => setOpenQrReader(true)}
-                disabled={loading}
-              >
-                Ler QR Code
-              </Button>
-            </Grid>
-            <Grid item xs={12}>
-              <Button
-                fullWidth
-                variant="contained"
-                onClick={clearData}
-                disabled={loading}
-              >
-                Limpar Dados
-              </Button>
-            </Grid>
-          </Grid>
+          )}
           {loading && (
             <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
               <CircularProgress />
@@ -198,11 +208,27 @@ const SearchVehicle: React.FC = () => {
           )}
           {vehicleData && (
             <Box mt={4}>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={clearData}
+                >
+                  Limpar Dados
+                </Button>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={handleViewHistory}
+                >
+                  Histórico de Veículo
+                </Button>
+              </Box>
               <Typography variant="h5" component="h2" gutterBottom>
                 Dados do Veículo
               </Typography>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={4}>
                   <TextField
                     fullWidth
                     label="Placa"
@@ -211,7 +237,7 @@ const SearchVehicle: React.FC = () => {
                     disabled
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={4}>
                   <TextField
                     fullWidth
                     label="Chassi"
@@ -220,11 +246,20 @@ const SearchVehicle: React.FC = () => {
                     disabled
                   />
                 </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    fullWidth
+                    label="RENAVAM"
+                    value={vehicleData.renavam}
+                    variant="outlined"
+                    disabled
+                  />
+                </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Modelo de Veículo"
-                    value={`${vehicleData.modelName} | ${VehicleManufacturers[vehicleData.manufacturer]} | ${vehicleData.observations}`}
+                    label="Quilometragem"
+                    value={vehicleData.mileage}
                     variant="outlined"
                     disabled
                   />
@@ -243,6 +278,15 @@ const SearchVehicle: React.FC = () => {
                     fullWidth
                     label="Ano Modelo"
                     value={vehicleData.modelYear}
+                    variant="outlined"
+                    disabled
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Modelo de Veículo"
+                    value={`${vehicleData.modelName} | ${VehicleManufacturers[vehicleData.manufacturer]} | ${vehicleData.observations}`}
                     variant="outlined"
                     disabled
                   />
@@ -279,15 +323,6 @@ const SearchVehicle: React.FC = () => {
                     fullWidth
                     label="ID do Contrato"
                     value={vehicleData.contractId !== undefined ? vehicleData.contractId : 'N/A'}
-                    variant="outlined"
-                    disabled
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Quilometragem"
-                    value={vehicleData.mileage}
                     variant="outlined"
                     disabled
                   />

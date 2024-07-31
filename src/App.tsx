@@ -13,6 +13,7 @@ import Companies from './components/Companies';
 import UpdateCompany from './components/UpdateCompany';
 import Vehicles from './components/Vehicles';
 import SearchVehicle from './components/SearchVehicle';
+import VehicleHistoric from './components/VehicleHistoric'; // Certifique-se de importar este componente
 import UpdateContract from './components/UpdateContract';
 import { RootState } from './store';
 
@@ -128,6 +129,14 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute condition={isAuthenticated} redirectTo="/login">
               <UpdateContract />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/vehicle-historic"
+          element={
+            <ProtectedRoute condition={isAuthenticated} redirectTo="/login">
+              <VehicleHistoric />
             </ProtectedRoute>
           }
         />

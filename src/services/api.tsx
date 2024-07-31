@@ -71,6 +71,7 @@ export interface GetVehicleDto {
   manufacturer: VehicleManufacturers;
   observations: string;
   renavam: string;
+  vehicleValue: number;
 }
 
 export interface InsertVehicleRequestDto {
@@ -85,7 +86,8 @@ export interface InsertVehicleRequestDto {
   ModelYear: string;
   ManufactureYear: string;
   CompaniesId: number;
-  renavam: string;
+  RENAVAM: string;
+  VehicleValue: number;
 }
 
 export interface VehicleModelDtoResponse {
@@ -105,6 +107,23 @@ export interface ClientDto {
   companiesId: number;
   name: string;
   taxNumber: string; 
+}
+
+export interface GetVehicleHistoricRequest {
+  licensePlate?: string;
+  chassis?: string;
+}
+
+export interface GetVehicleHistoricResponse {
+  vehicleId: number;
+  vehicleHistoricId: number;
+  licensePlate: string;
+  chassi: string;
+  contractId: number | null;
+  companyName: string | null;
+  companyTaxNumber: string | null;
+  inclusionDateTime: Date;
+  removalDateTime?: Date | null;
 }
 
 export const login = async (email: string, password: string): Promise<AuthResponse> => {
@@ -330,3 +349,12 @@ export async function getContractByCompanyId(id: number): Promise<ContractDto> {
   const response = await axios.get<ContractDto>(`/api/contracts/company/${id}`);
   return response.data;
 }
+
+export const getVehicleHistoric = async (data: GetVehicleHistoricRequest): Promise<GetVehicleHistoricResponse[]> => {
+  const response = await axios.post(`${API_URL}vehicle/GetVehicleHistoric`, data, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.data;
+};

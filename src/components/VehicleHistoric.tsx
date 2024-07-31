@@ -80,7 +80,14 @@ const VehicleHistoric: React.FC = () => {
     setEndDateInclusion('');
     setFilterApplied(false);
     setCurrentPage(1);
-    setInitialFetchDone(false); // This ensures the initial search does not trigger automatically
+    setInitialFetchDone(false);
+    navigate('/vehicle-historic', {
+      state: {
+        vehicleId: null,
+        chassi: null,
+        licensePlate: null,
+      },
+    });
   };
 
   const handleBackToSearch = () => {

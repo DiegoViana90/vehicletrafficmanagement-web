@@ -106,20 +106,21 @@ const VehicleHistoric: React.FC = () => {
     if (!filterApplied) return true;
 
     const startDate = startDateInclusion ? new Date(startDateInclusion) : null;
-    const endDate = endDateInclusion ? new Date(endDateInclusion) : null;
+    let endDate = endDateInclusion ? new Date(endDateInclusion) : null;
 
     if (startDate) {
       startDate.setHours(0, 0, 0, 0);
     }
     if (endDate) {
-      // Set end date to the end of the day (23:59:59)
-      endDate.setHours(23, 59, 59, 999);
+      endDate.setHours(23, 59, 59);
     }
 
-    if (startDate && new Date(record.inclusionDateTime) < startDate) {
+    const inclusionDateTime = new Date(record.inclusionDateTime);
+
+    if (startDate && inclusionDateTime < startDate) {
       return false;
     }
-    if (endDate && new Date(record.inclusionDateTime) > endDate) {
+    if (endDate && inclusionDateTime > endDate) {
       return false;
     }
 
@@ -194,7 +195,7 @@ const VehicleHistoric: React.FC = () => {
                 <Grid item xs={12} sm={5}>
                   <TextField
                     fullWidth
-                    label="Inicio da inclusão"
+                    label="Início da inclusão"
                     name="startDateInclusion"
                     type="date"
                     value={startDateInclusion}

@@ -21,6 +21,7 @@ import { getVehicleByChassis, getVehicleByLicensePlate, getVehicleByQRCode } fro
 import { toast } from 'react-toastify';
 import { GetVehicleDto } from '../services/api';
 import { VehicleStatus, FuelType, VehicleManufacturers } from '../constants/enum';
+import { NumericFormat } from 'react-number-format';
 
 const SearchVehicle: React.FC = () => {
   const [vehicleData, setVehicleData] = useState<GetVehicleDto | null>(null);
@@ -119,8 +120,14 @@ const SearchVehicle: React.FC = () => {
   const isChassisValid = chassis.length === 17;
 
   const handleViewHistory = () => {
-    navigate('/vehicle-historic', { state: { vehicleId: vehicleData?.id } });
-  };
+    navigate('/vehicle-historic', {
+      state: {
+        vehicleId: vehicleData?.id,
+        chassi: vehicleData?.chassis,
+        licensePlate: vehicleData?.licensePlate,
+      },
+    });
+  };  
 
   return (
     <Layout>
@@ -129,8 +136,15 @@ const SearchVehicle: React.FC = () => {
           <Typography variant="h4" component="h1" gutterBottom>
             Buscar Veículo
           </Typography>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={() => navigate('/vehicles')}
+          >
+          INCLUSÃO DE Novo Veículo
+          </Button>
           {!hasFetchedVehicle && (
-            <Grid container spacing={2}>
+            <Grid container spacing={2} mt={2}>
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
@@ -324,6 +338,18 @@ const SearchVehicle: React.FC = () => {
                     label="ID do Contrato"
                     value={vehicleData.contractId !== undefined ? vehicleData.contractId : 'N/A'}
                     variant="outlined"
+                    disabled
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <NumericFormat
+                    fullWidth
+                    customInput={TextField}
+                    label="Valor do Veículo"
+                    value={vehicleData.vehicleValue}
+                    thousandSeparator="."
+                    decimalSeparator=","
+                    prefix="R$ "
                     disabled
                   />
                 </Grid>

@@ -23,6 +23,7 @@ import {
 import { Add as AddIcon, Close as CloseIcon, Search as SearchIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import Layout from './Layout';
+import { NumericFormat } from 'react-number-format';
 import { getAllVehicleModels, insertVehicle, insertVehicleModel, getVehicleByChassis, getVehicleByLicensePlate } from '../services/api';
 import { toast } from 'react-toastify';
 import { VehicleModelDtoResponse, InsertVehicleRequestDto, GetVehicleDto } from '../services/api';
@@ -44,7 +45,8 @@ const Vehicles: React.FC = () => {
     ManufactureYear: '',
     ModelYear: '',
     CompaniesId: 0,
-    renavam: '',
+    RENAVAM: '',
+    VehicleValue: 0,
   });
 
   const [isFormValid, setIsFormValid] = useState(false);
@@ -88,7 +90,8 @@ const Vehicles: React.FC = () => {
               ContractId: response.contractId,
               ManufactureYear: response.manufactureYear,
               ModelYear: response.modelYear,
-              renavam: response.renavam,
+              RENAVAM: response.renavam,
+              VehicleValue: response.vehicleValue
             }));
             setSelectedVehicleModel(`${response.modelName} | ${VehicleManufacturers[response.manufacturer]} | ${response.observations}`);
             setHasFetchedVehicle(true);
@@ -125,7 +128,8 @@ const Vehicles: React.FC = () => {
               ContractId: response.contractId,
               ManufactureYear: response.manufactureYear,
               ModelYear: response.modelYear,
-              renavam: response.renavam,
+              RENAVAM: response.renavam,
+              VehicleValue: response.vehicleValue
             }));
             setSelectedVehicleModel(`${response.modelName} | ${VehicleManufacturers[response.manufacturer]} | ${response.observations}`);
             setHasFetchedVehicle(true);
@@ -228,6 +232,14 @@ const Vehicles: React.FC = () => {
     }
   };
 
+  const handleVehicleValueChange = (values: any) => {
+    const { formattedValue, value } = values;
+    setVehicleData((prevData) => ({
+      ...prevData,
+      VehicleValue: parseFloat(value),
+    }));
+  };
+
   const validateForm = () => {
     const isLicensePlateValid = vehicleData.LicensePlate?.replace(/[^A-Z0-9]/g, '').length === 7;
     const isChassisValid = vehicleData.Chassis?.length === 17;
@@ -239,7 +251,8 @@ const Vehicles: React.FC = () => {
     const isModelValid = vehicleData.VehicleModelId !== 0;
     const isManufactureYearValid = vehicleData.ManufactureYear?.trim() !== '';
     const isModelYearValid = vehicleData.ModelYear?.trim() !== '';
-    const isRenavamValid = vehicleData.renavam?.trim() !== '';
+    const isRenavamValid = vehicleData.RENAVAM?.trim() !== '';
+    const isVehicleValueValid = vehicleData.VehicleValue > 0;
 
     setIsFormValid(
       isLicensePlateValid &&
@@ -252,7 +265,8 @@ const Vehicles: React.FC = () => {
       isModelValid &&
       isManufactureYearValid &&
       isModelYearValid &&
-      isRenavamValid
+      isRenavamValid &&
+      isVehicleValueValid
     );
   };
 
@@ -290,7 +304,8 @@ const Vehicles: React.FC = () => {
       ManufactureYear: '',
       ModelYear: '',
       CompaniesId: companiesId,
-      renavam: '',
+      RENAVAM: '',
+      VehicleValue: 0,
     });
     setFieldsDisabled(false);
     setHasFetchedVehicle(false);
@@ -396,8 +411,8 @@ const Vehicles: React.FC = () => {
               <TextField
                 fullWidth
                 label="RENAVAM"
-                name="renavam"
-                value={vehicleData.renavam}
+                name="RENAVAM"
+                value={vehicleData.RENAVAM}
                 onChange={handleChange}
                 variant="outlined"
                 disabled={fieldsDisabled}
@@ -550,6 +565,26 @@ const Vehicles: React.FC = () => {
                 value={vehicleData.Mileage}
                 onChange={handleChange}
                 variant="outlined"
+                disabled={fieldsDisabled}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <NumericFormat
+                fullWidth
+                customInput={TextField}
+                label="Valor do Veículo"
+                name="VehicleValue"
+                value={vehicleData.VehicleValue}
+                onValueChange={(values) => {
+                  const { floatValue } = values;
+                  setVehicleData((prevData) => ({
+                    ...prevData,
+                    VehicleValue: floatValue || 0,
+                  }));
+                }}
+                thousandSeparator="."
+                decimalSeparator=","
+                prefix="R$ "
                 disabled={fieldsDisabled}
               />
             </Grid>

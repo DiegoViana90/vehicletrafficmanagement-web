@@ -97,16 +97,17 @@ export enum EnforcingAgency {
     DETRAN = 5,
     DNIT = 6,
     IBAMA = 7,
-    Guarda_Municipal = 8,
+    'Guarda Municipal' = 8,
     PM = 9,
     PRE = 10,
     PRF = 11,
+    AMC = 12,
     Outros = 99,
   }
   
   export enum FineStatus {
-    Active = 0,
-    SentToClient = 1,
-    Paid = 2,
-    Overdue = 3,
+    Ativo = 0,
+    'Enviado para o Cliente' = 1,
+    Pago = 2,
+    Vencido = 3,
   }

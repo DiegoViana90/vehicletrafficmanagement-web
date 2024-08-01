@@ -30,7 +30,7 @@ const Fines: React.FC = () => {
     FineAmount: 0,
     DiscountedFineAmount: 0,
     FinalFineAmount: 0,
-    FineStatus: FineStatus.Active,
+    FineStatus: FineStatus.Ativo,
     Description: '',
   });
 
@@ -78,7 +78,7 @@ const Fines: React.FC = () => {
       FineAmount: 0,
       DiscountedFineAmount: 0,
       FinalFineAmount: 0,
-      FineStatus: FineStatus.Active,
+      FineStatus: FineStatus.Ativo,
       Description: '',
     });
   };

@@ -1,5 +1,13 @@
 import axios from 'axios';
-import { UserType, VehicleStatus, ContractStatus, CompanyStatus, FuelType, VehicleManufacturers } from '../constants/enum';
+import { 
+  UserType,
+  VehicleStatus,
+  ContractStatus,
+  CompanyStatus, 
+  FuelType, 
+  VehicleManufacturers, 
+  EnforcingAgency, 
+  FineStatus } from '../constants/enum';
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -124,6 +132,21 @@ export interface GetVehicleHistoricResponse {
   companyTaxNumber: string | null;
   inclusionDateTime: Date;
   removalDateTime?: Date | null;
+}
+
+export interface FineDto {
+  RegistrationDate: Date;
+  VehicleId: number;
+  FineNumber: string;
+  FineDateTime: Date;
+  FineDueDate: Date;
+  EnforcingAgency: EnforcingAgency;
+  FineLocation: string;
+  FineAmount: number;
+  DiscountedFineAmount: number;
+  FinalFineAmount: number;
+  FineStatus: FineStatus;
+  Description?: string;
 }
 
 export const login = async (email: string, password: string): Promise<AuthResponse> => {
@@ -258,9 +281,6 @@ export const getVehicleByChassis = async (chassis: string, companiesId: number):
 
 export const getVehicleByLicensePlate = async (licensePlate: string, companiesId: number): Promise<GetVehicleDto | null> => {
   try {
-    console.log(licensePlate)
-    console.log(companiesId)
-
     const response = await axios.post(`${API_URL}vehicle/GetVehicleByLicensePlate`, {
       LicensePlate: licensePlate,
       CompaniesId: companiesId,
@@ -352,6 +372,15 @@ export async function getContractByCompanyId(id: number): Promise<ContractDto> {
 
 export const getVehicleHistoric = async (data: GetVehicleHistoricRequest): Promise<GetVehicleHistoricResponse[]> => {
   const response = await axios.post(`${API_URL}vehicle/GetVehicleHistoric`, data, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.data;
+};
+
+export const insertFine = async (fineDto: FineDto) => {
+  const response = await axios.post(`${API_URL}fine/InsertFine`, fineDto, {
     headers: {
       'Content-Type': 'application/json'
     }

@@ -13,7 +13,7 @@ import Companies from './components/Companies';
 import UpdateCompany from './components/UpdateCompany';
 import Vehicles from './components/Vehicles';
 import SearchVehicle from './components/SearchVehicle';
-import VehicleHistoric from './components/VehicleHistoric'; // Certifique-se de importar este componente
+import VehicleHistoric from './components/VehicleHistoric';
 import UpdateContract from './components/UpdateContract';
 import { RootState } from './store';
 

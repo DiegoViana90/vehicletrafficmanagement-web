@@ -133,7 +133,6 @@ export interface GetVehicleHistoricResponse {
   inclusionDateTime: Date;
   removalDateTime?: Date | null;
 }
-
 export interface FineDto {
   RegistrationDate: Date;
   VehicleId: number;
@@ -144,6 +143,7 @@ export interface FineDto {
   FineLocation: string;
   FineAmount: number;
   DiscountedFineAmount: number;
+  InterestFineAmount: number;
   FinalFineAmount: number;
   FineStatus: FineStatus;
   Description?: string;

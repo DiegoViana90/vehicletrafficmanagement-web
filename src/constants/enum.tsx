@@ -87,3 +87,27 @@ export enum VehicleManufacturers {
     Haval = 50,
     'Selecione uma Opção' = 99
 }
+
+export enum EnforcingAgency {
+    ANAC = 0,
+    ANTAQ = 1,
+    ANTT = 2,
+    CONCESSIONARIA = 3,
+    DER = 4,
+    DETRAN = 5,
+    DNIT = 6,
+    IBAMA = 7,
+    'Guarda Municipal' = 8,
+    PM = 9,
+    PRE = 10,
+    PRF = 11,
+    AMC = 12,
+    Outros = 99,
+  }
+  
+  export enum FineStatus {
+    Ativo = 0,
+    'Enviado para o Cliente' = 1,
+    Pago = 2,
+    Vencido = 3,
+  }

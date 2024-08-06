@@ -387,3 +387,29 @@ export const insertFine = async (fineDto: FineDto) => {
   });
   return response.data;
 };
+
+export const getFineByFineNumberAndVehicleId = async (fineNumber: string, vehicleId: number): Promise<FineDto | null> => {
+  try {
+    const response = await axios.post(`${API_URL}fine/GetFineByFineNumberAndVehicleId`, {
+      FineNumber: fineNumber,
+      VehicleId: vehicleId,
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao buscar multa pelo número e ID do veículo:', error);
+    return null;
+  }
+};
+
+export const updateFine = async (fineDto: FineDto) => {
+  const response = await axios.put(`${API_URL}fine/UpdateFine`, fineDto, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.data;
+};

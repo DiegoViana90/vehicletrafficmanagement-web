@@ -133,10 +133,12 @@ export interface GetVehicleHistoricResponse {
   inclusionDateTime: Date;
   removalDateTime?: Date | null;
 }
+
 export interface FineDto {
   RegistrationDate: Date;
   VehicleId: number;
   FineNumber: string;
+  LicensePlate: string;
   FineDateTime: Date;
   FineDueDate: Date;
   EnforcingAgency: EnforcingAgency;
@@ -399,7 +401,10 @@ export const getFineByFineNumberAndVehicleId = async (fineNumber: string, vehicl
       }
     });
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
+    if (error.response && error.response.status === 404) {
+      return null;
+    }
     console.error('Erro ao buscar multa pelo número e ID do veículo:', error);
     return null;
   }

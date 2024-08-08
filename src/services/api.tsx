@@ -133,10 +133,12 @@ export interface GetVehicleHistoricResponse {
   inclusionDateTime: Date;
   removalDateTime?: Date | null;
 }
+
 export interface FineDto {
   RegistrationDate: Date;
   VehicleId: number;
   FineNumber: string;
+  LicensePlate: string;
   FineDateTime: Date;
   FineDueDate: Date;
   EnforcingAgency: EnforcingAgency;
@@ -381,6 +383,35 @@ export const getVehicleHistoric = async (data: GetVehicleHistoricRequest): Promi
 
 export const insertFine = async (fineDto: FineDto) => {
   const response = await axios.post(`${API_URL}fine/InsertFine`, fineDto, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.data;
+};
+
+export const getFineByFineNumberAndVehicleId = async (fineNumber: string, vehicleId: number): Promise<FineDto | null> => {
+  try {
+    const response = await axios.post(`${API_URL}fine/GetFineByFineNumberAndVehicleId`, {
+      FineNumber: fineNumber,
+      VehicleId: vehicleId,
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response && error.response.status === 404) {
+      return null;
+    }
+    console.error('Erro ao buscar multa pelo número e ID do veículo:', error);
+    return null;
+  }
+};
+
+export const updateFine = async (fineDto: FineDto) => {
+  const response = await axios.put(`${API_URL}fine/UpdateFine`, fineDto, {
     headers: {
       'Content-Type': 'application/json'
     }

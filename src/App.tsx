@@ -15,6 +15,7 @@ import Vehicles from './components/Vehicles';
 import SearchVehicle from './components/SearchVehicle';
 import VehicleHistoric from './components/VehicleHistoric';
 import UpdateContract from './components/UpdateContract';
+import UpdateFine from './components/UpdateFine';
 import { RootState } from './store';
 
 interface ProtectedRouteProps {
@@ -137,6 +138,14 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute condition={isAuthenticated} redirectTo="/login">
               <VehicleHistoric />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/update-fine"
+          element={
+            <ProtectedRoute condition={isAuthenticated} redirectTo="/login">
+              <UpdateFine />
             </ProtectedRoute>
           }
         />

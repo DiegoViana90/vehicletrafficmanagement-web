@@ -1,3 +1,4 @@
+// src/components/Fines.tsx
 import React, { useState, ChangeEvent, useEffect } from 'react';
 import {
   Container,
@@ -25,10 +26,14 @@ import { EnforcingAgency, FineStatus } from '../constants/enum';
 import { format, isBefore, startOfDay, addDays } from 'date-fns';
 import Layout from './Layout';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setFineData } from '../reducers/FineSlice';
 
 const Fines: React.FC = () => {
   const navigate = useNavigate();
-  const [fineData, setFineData] = useState<FineDto>({
+  const dispatch = useDispatch();
+  const [fineData, setFineDataState] = useState<FineDto>({
+    Fineid: 0,
     RegistrationDate: new Date(),
     VehicleId: 0,
     FineNumber: '',
@@ -57,7 +62,7 @@ const Fines: React.FC = () => {
   const validateForm = () => {
     const isValid =
       fineData.FineNumber.trim() !== '' &&
-      fineData.FineDueDate instanceof Date &&
+      fineData.FineDueDate &&
       fineData.EnforcingAgency !== EnforcingAgency.Outros &&
       fineData.FineLocation.trim() !== '' &&
       fineData.FineAmount > 0 &&
@@ -72,7 +77,7 @@ const Fines: React.FC = () => {
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = event.target;
-    setFineData((prevData) => ({
+    setFineDataState((prevData) => ({
       ...prevData,
       [name]: value,
     }));
@@ -91,13 +96,13 @@ const Fines: React.FC = () => {
       if (name === 'FineDueDate') {
         setDueDateError('');
         const isPastDueDate = isBefore(date, currentDate) || date.getTime() === currentDate.getTime();
-        setFineData((prevData) => ({
+        setFineDataState((prevData) => ({
           ...prevData,
           [name]: date,
           FineStatus: isPastDueDate ? FineStatus.Vencido : FineStatus.Ativo,
         }));
       } else {
-        setFineData((prevData) => ({
+        setFineDataState((prevData) => ({
           ...prevData,
           [name]: date,
         }));
@@ -110,7 +115,7 @@ const Fines: React.FC = () => {
     if (name === 'includeDiscount') {
       setIncludeDiscount(checked);
       if (!checked) {
-        setFineData((prevData) => ({
+        setFineDataState((prevData) => ({
           ...prevData,
           DiscountedFineAmount: 0,
         }));
@@ -118,7 +123,7 @@ const Fines: React.FC = () => {
     } else if (name === 'includeInterest') {
       setIncludeInterest(checked);
       if (!checked) {
-        setFineData((prevData) => ({
+        setFineDataState((prevData) => ({
           ...prevData,
           InterestFineAmount: 0,
         }));
@@ -128,10 +133,9 @@ const Fines: React.FC = () => {
 
   const handleValueChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    const formattedValue = value.slice(0, 30);
-    setFineData((prevData) => ({
+    setFineDataState((prevData) => ({
       ...prevData,
-      [name]: Math.max(0, parseFloat(formattedValue)),
+      [name]: Math.max(0, parseFloat(value)),
     }));
   };
 
@@ -143,11 +147,7 @@ const Fines: React.FC = () => {
       if (existingFine) {
         setShowExistingFineModal(true);
       } else {
-        const updatedFineData = {
-          ...fineData,
-          FineDueDate: new Date(fineData.FineDueDate.setHours(0, 0, 0, 0)), // Ajuste a FineDueDate para ser uma data sem hora
-        };
-        await insertFine(updatedFineData);
+        await insertFine(fineData);
         toast.success('Multa criada com sucesso!');
         clearForm();
       }
@@ -160,29 +160,34 @@ const Fines: React.FC = () => {
 
   const handleLicensePlateChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
-    let formattedValue = value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7);
-
+    let formattedValue = value.toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (formattedValue.length > 3) {
       formattedValue = `${formattedValue.slice(0, 3)}-${formattedValue.slice(3)}`;
     }
-
     setLicensePlate(formattedValue);
   };
 
   const handleVehicleSearch = async () => {
+    if (!fineData.FineNumber || !licensePlate) return;
     setLoading(true);
     try {
       const company = JSON.parse(localStorage.getItem('company') || '{}');
       const companiesId = company.id;
       const vehicle = await getVehicleByLicensePlate(licensePlate, companiesId);
       if (vehicle) {
-        setFineData((prevData) => ({
+        setFineDataState((prevData) => ({
           ...prevData,
           VehicleId: vehicle.id,
           LicensePlate: vehicle.licensePlate,
         }));
-        setVehicleFound(true);
-        toast.success('Veículo encontrado!');
+        const fine = await getFineByFineNumberAndVehicleId(fineData.FineNumber, vehicle.id);
+        if (fine) {
+          dispatch(setFineData(fine));
+          setShowExistingFineModal(true);
+        } else {
+          setVehicleFound(true);
+          toast.success('Veículo encontrado! Preencha os dados da multa.');
+        }
       } else {
         setVehicleFound(false);
         toast.error('Veículo não encontrado.');
@@ -200,7 +205,8 @@ const Fines: React.FC = () => {
   };
 
   const clearForm = () => {
-    setFineData({
+    setFineDataState({
+      Fineid: 0,
       RegistrationDate: new Date(),
       VehicleId: 0,
       FineNumber: '',
@@ -236,7 +242,7 @@ const Fines: React.FC = () => {
 
   const handleSelectChange = (event: SelectChangeEvent<EnforcingAgency | FineStatus>) => {
     const { name, value } = event.target;
-    setFineData((prevData) => ({
+    setFineDataState((prevData) => ({
       ...prevData,
       [name]: value,
     }));
@@ -272,7 +278,6 @@ const Fines: React.FC = () => {
                 onChange={handleLicensePlateChange}
                 variant="outlined"
                 required
-                disabled={vehicleFound}
               />
             </Grid>
             <Grid item xs={12} display="flex" justifyContent="center">
@@ -280,9 +285,9 @@ const Fines: React.FC = () => {
                 variant="contained"
                 color="primary"
                 onClick={handleVehicleSearch}
-                disabled={loading || vehicleFound || licensePlate.length !== 8}
+                disabled={loading || !fineData.FineNumber || licensePlate.length !== 8}
               >
-                {loading ? <CircularProgress size={24} /> : 'Buscar Veículo'}
+                {loading ? <CircularProgress size={24} /> : 'Buscar Multa'}
               </Button>
             </Grid>
             {vehicleFound && (
@@ -468,7 +473,7 @@ const Fines: React.FC = () => {
                           <MenuItem
                             key={key}
                             value={FineStatus[key as keyof typeof FineStatus]}
-                            disabled={FineStatus[key as keyof typeof FineStatus] === FineStatus.Ativo && isBefore(fineData.FineDueDate, startOfDay(new Date()))}
+                            disabled={FineStatus[key as keyof typeof FineStatus] === FineStatus.Ativo && isBefore(new Date(fineData.FineDueDate), startOfDay(new Date()))}
                           >
                             {key}
                           </MenuItem>
@@ -527,7 +532,7 @@ const Fines: React.FC = () => {
             <Button onClick={() => { clearForm(); setShowExistingFineModal(false); }} color="primary">
               Adicionar Nova Multa
             </Button>
-            <Button onClick={() => navigate('/update-fine')} color="primary">
+            <Button onClick={() => navigate(`/update-fine`)} color="primary">
               Atualizar Multa
             </Button>
           </DialogActions>

@@ -135,6 +135,7 @@ export interface GetVehicleHistoricResponse {
 }
 
 export interface FineDto {
+  Fineid: number;
   RegistrationDate: Date;
   VehicleId: number;
   FineNumber: string;

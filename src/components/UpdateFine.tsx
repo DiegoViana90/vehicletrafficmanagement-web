@@ -1,3 +1,4 @@
+// src/components/UpdateFine.tsx
 import React, { useState, ChangeEvent, useEffect } from 'react';
 import {
   Container,
@@ -11,57 +12,37 @@ import {
   Select,
   InputLabel,
   FormControl,
+  FormControlLabel,
+  Checkbox,
+  SelectChangeEvent,
 } from '@mui/material';
 import { toast } from 'react-toastify';
-import { updateFine, getFineByFineNumberAndVehicleId, FineDto } from '../services/api';
+import { updateFine, FineDto } from '../services/api';
 import { EnforcingAgency, FineStatus } from '../constants/enum';
-import { format, isBefore, startOfDay } from 'date-fns';
 import Layout from './Layout';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store';
 
 const UpdateFine: React.FC = () => {
   const navigate = useNavigate();
-  const { fineNumber } = useParams<{ fineNumber?: string }>(); // Ajustado para aceitar opcional
-  const [fineData, setFineData] = useState<FineDto | null>({
-    RegistrationDate: new Date(),
-    VehicleId: 0,
-    FineNumber: '',
-    LicensePlate: '',
-    FineDateTime: new Date(),
-    FineDueDate: new Date(),
-    EnforcingAgency: EnforcingAgency.Outros,
-    FineLocation: '',
-    FineAmount: 0,
-    DiscountedFineAmount: 0,
-    InterestFineAmount: 0,
-    FinalFineAmount: 0,
-    FineStatus: FineStatus.Ativo,
-    Description: '',
-  });
+  const fineDataFromStore = useSelector((state: RootState) => state.fine.data); // Accessing fine data from Redux
+  const [fineData, setFineData] = useState<FineDto | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    const fetchFineData = async () => {
-      if (fineNumber) {
-        setLoading(true);
-        try {
-          const fine = await getFineByFineNumberAndVehicleId(fineNumber, 0);
-          if (fine) {
-            setFineData(fine);
-          } else {
-            toast.error('Multa não encontrada.');
-            navigate('/'); // Redireciona se a multa não for encontrada
-          }
-        } catch (error) {
-          toast.error('Erro ao buscar multa.');
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchFineData();
-  }, [fineNumber, navigate]);
+    if (fineDataFromStore) {
+      setFineData({
+        ...fineDataFromStore,
+        FineDateTime: fineDataFromStore.FineDateTime || '',
+        FineDueDate: fineDataFromStore.FineDueDate || '',
+        LicensePlate: fineDataFromStore.LicensePlate || ''
+      });
+    } else {
+      navigate('/fines');
+    }
+  }, [fineDataFromStore, navigate]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -85,18 +66,16 @@ const UpdateFine: React.FC = () => {
     } : null));
   };
 
-  const formatToLocalDateTime = (date: Date) => {
-    if (!(date instanceof Date) || isNaN(date.getTime())) {
-      return '';
-    }
-    return format(date, "yyyy-MM-dd'T'HH:mm");
+  const handleSelectChange = (event: SelectChangeEvent<EnforcingAgency | FineStatus>) => {
+    const { name, value } = event.target;
+    setFineData((prevData) => (prevData ? {
+      ...prevData,
+      [name]: value,
+    } : null));
   };
 
-  const formatToDateOnly = (date: Date) => {
-    if (!(date instanceof Date) || isNaN(date.getTime())) {
-      return '';
-    }
-    return format(date, "yyyy-MM-dd");
+  const handleEdit = () => {
+    setIsEditing(true);
   };
 
   return (
@@ -140,48 +119,76 @@ const UpdateFine: React.FC = () => {
                     required
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Data da Multa"
-                    name="FineDateTime"
-                    type="datetime-local"
-                    value={formatToLocalDateTime(new Date(fineData.FineDateTime))}
-                    onChange={handleChange}
-                    variant="outlined"
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Data de Vencimento"
-                    name="FineDueDate"
-                    type="date"
-                    value={formatToDateOnly(new Date(fineData.FineDueDate))}
-                    onChange={handleChange}
-                    variant="outlined"
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    required
-                  />
-                </Grid>
+                {isEditing ? (
+                  <>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        label="Data da Multa"
+                        name="FineDateTime"
+                        type="datetime-local"
+                        value={fineData.FineDateTime}
+                        onChange={handleChange}
+                        variant="outlined"
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                        required
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        label="Data de Vencimento"
+                        name="FineDueDate"
+                        type="date"
+                        value={fineData.FineDueDate}
+                        onChange={handleChange}
+                        variant="outlined"
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                        required
+                      />
+                    </Grid>
+                  </>
+                ) : (
+                  <>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        label="Data da Multa"
+                        name="FineDateTime"
+                        value={fineData.FineDateTime}
+                        variant="outlined"
+                        InputProps={{
+                          readOnly: true,
+                        }}
+                        required
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        label="Data de Vencimento"
+                        name="FineDueDate"
+                        value={fineData.FineDueDate}
+                        variant="outlined"
+                        InputProps={{
+                          readOnly: true,
+                        }}
+                        required
+                      />
+                    </Grid>
+                  </>
+                )}
                 <Grid item xs={12}>
                   <FormControl fullWidth variant="outlined" required>
                     <InputLabel>Órgão Autuador</InputLabel>
                     <Select
                       name="EnforcingAgency"
                       value={fineData.EnforcingAgency}
-                      onChange={(event) =>
-                        setFineData((prevData) => (prevData ? {
-                          ...prevData,
-                          EnforcingAgency: event.target.value as EnforcingAgency,
-                        } : null))
-                      }
+                      onChange={handleSelectChange}
                       label="Órgão Autuador"
                     >
                       {Object.keys(EnforcingAgency)
@@ -269,12 +276,7 @@ const UpdateFine: React.FC = () => {
                     <Select
                       name="FineStatus"
                       value={fineData.FineStatus}
-                      onChange={(event) =>
-                        setFineData((prevData) => (prevData ? {
-                          ...prevData,
-                          FineStatus: event.target.value as FineStatus,
-                        } : null))
-                      }
+                      onChange={handleSelectChange}
                       label="Status da Multa"
                     >
                       {Object.keys(FineStatus)
@@ -283,7 +285,6 @@ const UpdateFine: React.FC = () => {
                           <MenuItem
                             key={key}
                             value={FineStatus[key as keyof typeof FineStatus]}
-                            disabled={FineStatus[key as keyof typeof FineStatus] === FineStatus.Ativo && isBefore(new Date(fineData.FineDueDate), startOfDay(new Date()))}
                           >
                             {key}
                           </MenuItem>
@@ -305,12 +306,33 @@ const UpdateFine: React.FC = () => {
                 </Grid>
                 <Grid item xs={12}>
                   <Box display="flex" justifyContent="center" gap={2}>
-                    <Button type="submit" variant="contained" color="primary" disabled={loading}>
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      color="primary"
+                      disabled={loading}
+                    >
                       {loading ? <CircularProgress size={24} /> : 'Atualizar Multa'}
                     </Button>
-                    <Button type="button" variant="contained" color="secondary" onClick={() => navigate('/fines')} disabled={loading}>
+                    <Button
+                      type="button"
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => navigate('/fines')}
+                      disabled={loading}
+                    >
                       Voltar
                     </Button>
+                    {!isEditing && (
+                      <Button
+                        type="button"
+                        variant="contained"
+                        color="primary"
+                        onClick={handleEdit}
+                      >
+                        Editar Multa
+                      </Button>
+                    )}
                   </Box>
                 </Grid>
               </Grid>

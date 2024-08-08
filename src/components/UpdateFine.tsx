@@ -12,8 +12,6 @@ import {
   Select,
   InputLabel,
   FormControl,
-  FormControlLabel,
-  Checkbox,
   SelectChangeEvent,
 } from '@mui/material';
 import { toast } from 'react-toastify';
@@ -26,18 +24,18 @@ import { RootState } from '../store';
 
 const UpdateFine: React.FC = () => {
   const navigate = useNavigate();
-  const fineDataFromStore = useSelector((state: RootState) => state.fine.data); // Accessing fine data from Redux
+  const fineDataFromStore = useSelector((state: RootState) => state.fine.data);
   const [fineData, setFineData] = useState<FineDto | null>(null);
   const [loading, setLoading] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     if (fineDataFromStore) {
       setFineData({
         ...fineDataFromStore,
-        FineDateTime: fineDataFromStore.FineDateTime || '',
-        FineDueDate: fineDataFromStore.FineDueDate || '',
-        LicensePlate: fineDataFromStore.LicensePlate || ''
+        FineDateTime: fineDataFromStore.FineDateTime,
+        FineDueDate: fineDataFromStore.FineDueDate,
+        LicensePlate: fineDataFromStore.LicensePlate,
       });
     } else {
       navigate('/fines');
@@ -75,7 +73,7 @@ const UpdateFine: React.FC = () => {
   };
 
   const handleEdit = () => {
-    setIsEditing(true);
+    setEditMode(true);
   };
 
   return (
@@ -119,7 +117,7 @@ const UpdateFine: React.FC = () => {
                     required
                   />
                 </Grid>
-                {isEditing ? (
+                {editMode ? (
                   <>
                     <Grid item xs={12} sm={6}>
                       <TextField
@@ -159,7 +157,7 @@ const UpdateFine: React.FC = () => {
                         fullWidth
                         label="Data da Multa"
                         name="FineDateTime"
-                        value={fineData.FineDateTime}
+                        value={fineData.FineDateTime?.toString()}
                         variant="outlined"
                         InputProps={{
                           readOnly: true,
@@ -172,7 +170,7 @@ const UpdateFine: React.FC = () => {
                         fullWidth
                         label="Data de Vencimento"
                         name="FineDueDate"
-                        value={fineData.FineDueDate}
+                        value={fineData.FineDueDate?.toString()}
                         variant="outlined"
                         InputProps={{
                           readOnly: true,
@@ -323,7 +321,7 @@ const UpdateFine: React.FC = () => {
                     >
                       Voltar
                     </Button>
-                    {!isEditing && (
+                    {!editMode && (
                       <Button
                         type="button"
                         variant="contained"

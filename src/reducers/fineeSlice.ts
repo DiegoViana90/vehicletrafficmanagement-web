@@ -1,4 +1,3 @@
-// src/reducers/fineeSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { FineDto } from '../services/api';
 
@@ -15,6 +14,7 @@ const fineSlice = createSlice({
   initialState,
   reducers: {
     setFineData(state, action: PayloadAction<FineDto | null>) {
+      console.log("Dados armazenados no Redux:", action.payload);
       state.data = action.payload;
     },
     clearFineData(state) {
@@ -23,6 +23,6 @@ const fineSlice = createSlice({
   },
 });
 
-export const { setFineData, clearFineData } = fineSlice.actions;
 
+export const { setFineData, clearFineData } = fineSlice.actions;
 export default fineSlice.reducer;

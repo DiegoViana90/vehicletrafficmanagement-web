@@ -25,6 +25,7 @@ import Sidebar from '../components/Sidebar';
 const UpdateFine: React.FC = () => {
   const navigate = useNavigate();
   const fineDataFromStore = useSelector((state: RootState) => state.fine.data);
+  console.log("Dados recebidos do Redux:", fineDataFromStore);
   const [fineData, setFineData] = useState<FineDto | null>(fineDataFromStore);
   const [loading, setLoading] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
@@ -37,7 +38,7 @@ const UpdateFine: React.FC = () => {
     }
   }, [fineDataFromStore, navigate]);
 
-  const validateForm = () => {
+  useEffect(() => {
     const isValid =
       fineData?.FineNumber?.trim() !== '' &&
       fineData?.FineDueDate &&
@@ -48,10 +49,10 @@ const UpdateFine: React.FC = () => {
       fineData?.FineAmount > 0 &&
       fineData?.FinalFineAmount >= 0;
     setIsFormValid(isValid || false);
-  };
 
-  useEffect(() => {
-    validateForm();
+    // Exibir os valores da placa e da multa para depuração
+    console.log("Placa do Veículo:", fineData?.LicensePlate);
+    console.log("Valor da Multa:", fineData?.FineAmount);
   }, [fineData]);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

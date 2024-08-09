@@ -158,6 +158,10 @@ const Fines: React.FC = () => {
   const handleVehicleSearch = async () => {
     if (!fineData.FineNumber || !licensePlate) return;
     setLoading(true);
+  
+    console.log('Número da Multa:', fineData.FineNumber);
+    console.log('Placa do Veículo:', licensePlate);
+  
     try {
       const company = JSON.parse(localStorage.getItem('company') || '{}');
       const companiesId = company.id;
@@ -231,6 +235,10 @@ const Fines: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+  
+    console.log('Número da Multa:', fineData.FineNumber);
+    console.log('Placa do Veículo:', fineData.LicensePlate);
+  
     try {
       const existingFine = await getFineByFineNumberAndVehicleId(fineData.FineNumber, fineData.VehicleId);
       if (existingFine) {
@@ -246,6 +254,7 @@ const Fines: React.FC = () => {
       setLoading(false);
     }
   };
+  
 
   return (
     <Layout>

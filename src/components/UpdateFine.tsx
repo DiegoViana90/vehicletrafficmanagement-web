@@ -50,9 +50,9 @@ const UpdateFine: React.FC = () => {
       fineData?.FinalFineAmount >= 0;
     setIsFormValid(isValid || false);
 
-    // Exibir os valores da placa e da multa para depuração
+    // Exibir os valores da placa e do número da multa para depuração
     console.log("Placa do Veículo:", fineData?.LicensePlate);
-    console.log("Valor da Multa:", fineData?.FineAmount);
+    console.log("Número da Multa:", fineData?.FineNumber);
   }, [fineData]);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

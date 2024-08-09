@@ -154,43 +154,46 @@ const Fines: React.FC = () => {
     }
     setLicensePlate(formattedValue);
   };
-
   const handleVehicleSearch = async () => {
     if (!fineData.FineNumber || !licensePlate) return;
     setLoading(true);
-  
+
     console.log('Número da Multa:', fineData.FineNumber);
     console.log('Placa do Veículo:', licensePlate);
-  
+
     try {
-      const company = JSON.parse(localStorage.getItem('company') || '{}');
-      const companiesId = company.id;
-      const vehicle = await getVehicleByLicensePlate(licensePlate, companiesId);
-      if (vehicle) {
-        setFineDataState((prevData) => ({
-          ...prevData,
-          VehicleId: vehicle.id,
-          LicensePlate: vehicle.licensePlate,
-        }));
-        const fine = await getFineByFineNumberAndVehicleId(fineData.FineNumber, vehicle.id);
-        if (fine) {
-          dispatch(setFineData(fine));
-          setShowExistingFineModal(true);
+        const company = JSON.parse(localStorage.getItem('company') || '{}');
+        const companiesId = company.id;
+        const vehicle = await getVehicleByLicensePlate(licensePlate, companiesId);
+        if (vehicle) {
+            setFineDataState((prevData) => ({
+                ...prevData,
+                VehicleId: vehicle.id,
+                LicensePlate: vehicle.licensePlate,
+            }));
+            dispatch(setFineData({
+                ...fineData,
+                LicensePlate: vehicle.licensePlate,
+            })); // Salve os dados no Redux
+
+            const fine = await getFineByFineNumberAndVehicleId(fineData.FineNumber, vehicle.id);
+            if (fine) {
+                setShowExistingFineModal(true);
+            } else {
+                setVehicleFound(true);
+                toast.success('Veículo encontrado! Preencha os dados da multa.');
+            }
         } else {
-          setVehicleFound(true);
-          toast.success('Veículo encontrado! Preencha os dados da multa.');
+            setVehicleFound(false);
+            toast.error('Veículo não encontrado.');
         }
-      } else {
-        setVehicleFound(false);
-        toast.error('Veículo não encontrado.');
-      }
     } catch (error) {
-      setVehicleFound(false);
-      toast.error('Erro ao buscar veículo.');
+        setVehicleFound(false);
+        toast.error('Erro ao buscar veículo.');
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
 
   const formatToLocalDateTime = (date: Date) => {
     if (!(date instanceof Date) || isNaN(date.getTime())) {

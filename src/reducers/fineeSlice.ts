@@ -1,3 +1,4 @@
+// src/reducers/fineeSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { FineDto } from '../services/api';
 
@@ -13,7 +14,7 @@ const fineSlice = createSlice({
   name: 'fine',
   initialState,
   reducers: {
-    setFineData(state, action: PayloadAction<FineDto>) {
+    setFineData(state, action: PayloadAction<FineDto | null>) {
       state.data = action.payload;
     },
     clearFineData(state) {
@@ -23,4 +24,5 @@ const fineSlice = createSlice({
 });
 
 export const { setFineData, clearFineData } = fineSlice.actions;
+
 export default fineSlice.reducer;

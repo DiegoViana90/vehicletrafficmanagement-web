@@ -1,6 +1,5 @@
-// src/store.ts
 import { configureStore } from '@reduxjs/toolkit';
-import fineReducer from './reducers/FineSlice';
+import fineReducer from './reducers/fineeSlice';
 import authReducer from './reducers/authReducer';
 import companyReducer from './reducers/companySlice';
 

@@ -1,4 +1,3 @@
-// src/components/Fines.tsx
 import React, { useState, ChangeEvent, useEffect } from 'react';
 import {
   Container,
@@ -8,8 +7,8 @@ import {
   Typography,
   CircularProgress,
   Grid,
-  MenuItem,
   Select,
+  MenuItem,
   InputLabel,
   FormControl,
   FormControlLabel,
@@ -27,7 +26,7 @@ import { format, isBefore, startOfDay, addDays } from 'date-fns';
 import Layout from './Layout';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { setFineData } from '../reducers/FineSlice';
+import { setFineData } from '../reducers/fineeSlice';
 
 const Fines: React.FC = () => {
   const navigate = useNavigate();
@@ -83,31 +82,12 @@ const Fines: React.FC = () => {
     }));
   };
 
-  const handleDateChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleSelectChange = (event: SelectChangeEvent<string>) => {
     const { name, value } = event.target;
-    const date = new Date(value);
-    const currentDate = startOfDay(new Date());
-
-    if (isNaN(date.getTime())) {
-      if (name === 'FineDueDate') {
-        setDueDateError('Data inválida');
-      }
-    } else {
-      if (name === 'FineDueDate') {
-        setDueDateError('');
-        const isPastDueDate = isBefore(date, currentDate) || date.getTime() === currentDate.getTime();
-        setFineDataState((prevData) => ({
-          ...prevData,
-          [name]: date,
-          FineStatus: isPastDueDate ? FineStatus.Vencido : FineStatus.Ativo,
-        }));
-      } else {
-        setFineDataState((prevData) => ({
-          ...prevData,
-          [name]: date,
-        }));
-      }
-    }
+    setFineDataState((prevData) => ({
+      ...prevData,
+      [name]: parseInt(value, 10),
+    }));
   };
 
   const handleCheckboxChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -139,22 +119,30 @@ const Fines: React.FC = () => {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const existingFine = await getFineByFineNumberAndVehicleId(fineData.FineNumber, fineData.VehicleId);
-      if (existingFine) {
-        setShowExistingFineModal(true);
-      } else {
-        await insertFine(fineData);
-        toast.success('Multa criada com sucesso!');
-        clearForm();
+  const handleDateChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    const date = new Date(value);
+    const currentDate = startOfDay(new Date());
+
+    if (isNaN(date.getTime())) {
+      if (name === 'FineDueDate') {
+        setDueDateError('Data inválida');
       }
-    } catch (error) {
-      toast.error('Erro ao criar multa.');
-    } finally {
-      setLoading(false);
+    } else {
+      if (name === 'FineDueDate') {
+        setDueDateError('');
+        const isPastDueDate = isBefore(date, currentDate) || date.getTime() === currentDate.getTime();
+        setFineDataState((prevData) => ({
+          ...prevData,
+          [name]: date,
+          FineStatus: isPastDueDate ? FineStatus.Vencido : FineStatus.Ativo,
+        }));
+      } else {
+        setFineDataState((prevData) => ({
+          ...prevData,
+          [name]: date,
+        }));
+      }
     }
   };
 
@@ -200,6 +188,20 @@ const Fines: React.FC = () => {
     }
   };
 
+  const formatToLocalDateTime = (date: Date) => {
+    if (!(date instanceof Date) || isNaN(date.getTime())) {
+      return '';
+    }
+    return format(date, "yyyy-MM-dd'T'HH:mm");
+  };
+
+  const formatToDateOnly = (date: Date) => {
+    if (!(date instanceof Date) || isNaN(date.getTime())) {
+      return '';
+    }
+    return format(date, 'yyyy-MM-dd');
+  };
+
   const handleDialogClose = () => {
     setShowDialog(false);
   };
@@ -226,26 +228,23 @@ const Fines: React.FC = () => {
     setVehicleFound(false);
   };
 
-  const formatToLocalDateTime = (date: Date) => {
-    if (!(date instanceof Date) || isNaN(date.getTime())) {
-      return '';
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const existingFine = await getFineByFineNumberAndVehicleId(fineData.FineNumber, fineData.VehicleId);
+      if (existingFine) {
+        setShowExistingFineModal(true);
+      } else {
+        await insertFine(fineData);
+        toast.success('Multa criada com sucesso!');
+        clearForm();
+      }
+    } catch (error) {
+      toast.error('Erro ao criar multa.');
+    } finally {
+      setLoading(false);
     }
-    return format(date, "yyyy-MM-dd'T'HH:mm");
-  };
-
-  const formatToDateOnly = (date: Date) => {
-    if (!(date instanceof Date) || isNaN(date.getTime())) {
-      return '';
-    }
-    return format(date, "yyyy-MM-dd");
-  };
-
-  const handleSelectChange = (event: SelectChangeEvent<EnforcingAgency | FineStatus>) => {
-    const { name, value } = event.target;
-    setFineDataState((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
   };
 
   return (
@@ -329,14 +328,14 @@ const Fines: React.FC = () => {
                     <InputLabel>Órgão Autuador</InputLabel>
                     <Select
                       name="EnforcingAgency"
-                      value={fineData.EnforcingAgency}
+                      value={fineData.EnforcingAgency.toString()}
                       onChange={handleSelectChange}
                       label="Órgão Autuador"
                     >
                       {Object.keys(EnforcingAgency)
                         .filter((key) => isNaN(Number(key)))
                         .map((key) => (
-                          <MenuItem key={key} value={EnforcingAgency[key as keyof typeof EnforcingAgency]}>
+                          <MenuItem key={key} value={EnforcingAgency[key as keyof typeof EnforcingAgency].toString()}>
                             {key}
                           </MenuItem>
                         ))}
@@ -463,7 +462,7 @@ const Fines: React.FC = () => {
                     <InputLabel>Status da Multa</InputLabel>
                     <Select
                       name="FineStatus"
-                      value={fineData.FineStatus}
+                      value={fineData.FineStatus.toString()}
                       onChange={handleSelectChange}
                       label="Status da Multa"
                     >
@@ -472,7 +471,7 @@ const Fines: React.FC = () => {
                         .map((key) => (
                           <MenuItem
                             key={key}
-                            value={FineStatus[key as keyof typeof FineStatus]}
+                            value={FineStatus[key as keyof typeof FineStatus].toString()}
                             disabled={FineStatus[key as keyof typeof FineStatus] === FineStatus.Ativo && isBefore(new Date(fineData.FineDueDate), startOfDay(new Date()))}
                           >
                             {key}
